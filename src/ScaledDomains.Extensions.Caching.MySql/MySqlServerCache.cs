@@ -62,14 +62,20 @@ namespace ScaledDomains.Extensions.Caching.MySql
             throw new NotImplementedException();
         }
 
+        /// <inheritdoc />
         public void Refresh(string key)
         {
-            throw new NotImplementedException();
+            ValidateKey(key);
+
+            _databaseOperations.RefreshCacheItem(key);
         }
 
+        /// <inheritdoc />
         public Task RefreshAsync(string key, CancellationToken token = new CancellationToken())
         {
-            throw new NotImplementedException();
+            ValidateKey(key);
+
+            return _databaseOperations.RefreshCacheItemAsync(key, token);
         }
 
         public void Remove(string key)

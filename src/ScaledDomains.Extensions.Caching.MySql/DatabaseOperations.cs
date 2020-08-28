@@ -64,15 +64,15 @@ namespace ScaledDomains.Extensions.Caching.MySql
             command.Parameters.Add(new MySqlParameter("@Id", MySqlDbType.VarString, 767) { Value = key });
             command.Parameters.Add(new MySqlParameter("@UtcNow", MySqlDbType.Timestamp) { Value = utcNow  });
 
-            await connection.OpenAsync(token);
+            await connection.OpenAsync(token).ConfigureAwait(false);
 
             byte[] result = null;
 
-            using var reader = await command.ExecuteReaderAsync(CommandBehavior.SingleRow | CommandBehavior.SingleResult | CommandBehavior.SequentialAccess, token);
+            using var reader = await command.ExecuteReaderAsync(CommandBehavior.SingleRow | CommandBehavior.SingleResult | CommandBehavior.SequentialAccess, token).ConfigureAwait(false);
 
-            if (await reader.ReadAsync(token))
+            if (await reader.ReadAsync(token).ConfigureAwait(false))
             {
-                result = await reader.GetFieldValueAsync<byte[]>(0, token);
+                result = await reader.GetFieldValueAsync<byte[]>(0, token).ConfigureAwait(false);
             }
 
             return result;
@@ -87,7 +87,7 @@ namespace ScaledDomains.Extensions.Caching.MySql
             
             var cmdText = _sqlCommands.SetCache;
 
-            using var connection = new MySqlConnection();
+            using var connection = new MySqlConnection(_options.ConnectionString);
             using var command = new MySqlCommand(cmdText, connection);
 
             command.Parameters.Add(new MySqlParameter("@Id", MySqlDbType.VarString, 767) { Value = key });
@@ -119,7 +119,7 @@ namespace ScaledDomains.Extensions.Caching.MySql
 
             var cmdText = _sqlCommands.SetCache;
 
-            using var connection = new MySqlConnection();
+            using var connection = new MySqlConnection(_options.ConnectionString);
             using var command = new MySqlCommand(cmdText, connection);
 
             command.Parameters.Add(new MySqlParameter("@Id", MySqlDbType.VarString, 767) { Value = key });
@@ -138,6 +138,38 @@ namespace ScaledDomains.Extensions.Caching.MySql
             {
                 
             }
+        }
+
+        public void RefreshCacheItem(string key)
+        {
+            var cmdText = _sqlCommands.RefreshCache;
+            var utcNow = _systemClock.UtcNow;
+
+            using var connection = new MySqlConnection(_options.ConnectionString);
+            using var command = new MySqlCommand(cmdText, connection);
+
+            command.Parameters.Add(new MySqlParameter("@Id", MySqlDbType.VarString, 767) { Value = key });
+            command.Parameters.Add(new MySqlParameter("@UtcNow", MySqlDbType.Timestamp) { Value = utcNow });
+
+            connection.Open();
+
+            command.ExecuteNonQuery();
+        }
+
+        public async Task RefreshCacheItemAsync(string key, CancellationToken token = default)
+        {
+            var cmdText = _sqlCommands.RefreshCache;
+            var utcNow = _systemClock.UtcNow;
+
+            using var connection = new MySqlConnection(_options.ConnectionString);
+            using var command = new MySqlCommand(cmdText, connection);
+
+            command.Parameters.Add(new MySqlParameter("@Id", MySqlDbType.VarString, 767) { Value = key });
+            command.Parameters.Add(new MySqlParameter("@UtcNow", MySqlDbType.Timestamp) { Value = utcNow });
+
+            await connection.OpenAsync(token).ConfigureAwait(false);
+
+            await command.ExecuteNonQueryAsync(token).ConfigureAwait(false);
         }
 
         private bool IsDuplicateKeyException(MySqlException ex) => ex.ErrorCode == (int)MySqlErrorCode.DuplicateKey; //TODO: must be tested

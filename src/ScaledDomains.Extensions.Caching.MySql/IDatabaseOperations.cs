@@ -12,6 +12,10 @@ namespace ScaledDomains.Extensions.Caching.MySql
 
         void SetCacheItem(string key, byte[] value, DistributedCacheEntryOptions options);
 
-        Task SetCacheItemAsync(string key, byte[] value, DistributedCacheEntryOptions options, CancellationToken token = default(CancellationToken));
+        Task SetCacheItemAsync(string key, byte[] value, DistributedCacheEntryOptions options, CancellationToken token = default);
+
+        void RefreshCacheItem(string key);
+
+        Task RefreshCacheItemAsync(string key, CancellationToken token = default);
     }
 }
