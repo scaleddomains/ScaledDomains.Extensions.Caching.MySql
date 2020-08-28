@@ -1,20 +1,54 @@
-﻿using System;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Caching.Distributed;
 
 namespace ScaledDomains.Extensions.Caching.MySql
 {
+    /// <summary>
+    /// <see cref="IDistributedCache"/> cache implementation using MySQL database.
+    /// </summary>
     public class MySqlServerCache : IDistributedCache
     {
-        public byte[] Get(string key)
+        private const int MaxKeyLength = 255;
+
+        private readonly IDatabaseOperations _databaseOperations;
+
+        public MySqlServerCache(IOptions<MySqlServerCacheOptions> options)
         {
-            throw new NotImplementedException();
+            if (options == null)
+            {
+                throw new ArgumentNullException(nameof(options), $"{nameof(options)} cannot be null.");
+            }
+
+            if (string.IsNullOrWhiteSpace(options.Value.ConnectionString))
+            {
+                throw new ArgumentNullException(nameof(options.Value.ConnectionString), $"{nameof(options.Value.ConnectionString)} cannot be null or empty.");
+            }
+
+            if (string.IsNullOrWhiteSpace(options.Value.TableName))
+            {
+                throw new ArgumentNullException(nameof(options.Value.TableName), $"{nameof(options.Value.TableName)} cannot be null or empty.");
+            }
+
+            _databaseOperations = new DatabaseOperations(options.Value);
         }
 
+        /// <inheritdoc />
+        public byte[] Get(string key)
+        {
+            ValidateKey(key);
+
+            return _databaseOperations.GetCacheItem(key);
+        }
+
+        /// <inheritdoc />
         public Task<byte[]> GetAsync(string key, CancellationToken token = new CancellationToken())
         {
-            throw new NotImplementedException();
+            ValidateKey(key);
+
+            return _databaseOperations.GetCacheItemAsync(key, token);
         }
 
         public void Set(string key, byte[] value, DistributedCacheEntryOptions options)
@@ -46,6 +80,19 @@ namespace ScaledDomains.Extensions.Caching.MySql
         public Task RemoveAsync(string key, CancellationToken token = new CancellationToken())
         {
             throw new NotImplementedException();
+        }
+
+        private static void ValidateKey(string key)
+        {
+            if (string.IsNullOrWhiteSpace(key))
+            {
+                throw new ArgumentNullException(nameof(key), $"{nameof(key)} cannot be null or empty.");
+            }
+
+            if (key.Length >= MaxKeyLength)
+            {
+                throw new ArgumentOutOfRangeException(nameof(key), key.Length, $"{nameof(key)} length cannot be more than {MaxKeyLength}.");
+            }
         }
     }
 }
