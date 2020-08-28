@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Internal;
+using Microsoft.Extensions.Options;
 using MySql.Data.MySqlClient;
 
 namespace ScaledDomains.Extensions.Caching.MySql
@@ -12,13 +13,15 @@ namespace ScaledDomains.Extensions.Caching.MySql
     {
         private readonly SqlCommands _sqlCommands;
         private readonly ISystemClock _systemClock;
+        private readonly MySqlServerCacheOptions _options;
 
         public DatabaseOperations(MySqlServerCacheOptions options)
         {
-            var connectionStringBuilder = new MySqlConnectionStringBuilder(options.ConnectionString);
-
-            _sqlCommands = new SqlCommands(connectionStringBuilder.Database, options.TableName);
-            _systemClock = options.SystemClock;
+            _options = options;
+            var connectionStringBuilder = new MySqlConnectionStringBuilder(_options.ConnectionString);
+            
+            _sqlCommands = new SqlCommands(connectionStringBuilder.Database, _options.TableName);
+            _systemClock = _options.SystemClock;
         }
 
         public byte[] GetCacheItem(string key)
@@ -27,7 +30,7 @@ namespace ScaledDomains.Extensions.Caching.MySql
 
             var cmdText = _sqlCommands.GetCache;
 
-            using var connection = new MySqlConnection();
+            using var connection = new MySqlConnection(_options.ConnectionString);
             using var command = new MySqlCommand(cmdText, connection);
 
             command.Parameters.Add(new MySqlParameter("@Id", MySqlDbType.VarString, 767) { Value = key });
@@ -55,7 +58,7 @@ namespace ScaledDomains.Extensions.Caching.MySql
 
             var cmdText = _sqlCommands.GetCache;
 
-            using var connection = new MySqlConnection();
+            using var connection = new MySqlConnection(_options.ConnectionString);
             using var command = new MySqlCommand(cmdText, connection);
 
             command.Parameters.Add(new MySqlParameter("@Id", MySqlDbType.VarString, 767) { Value = key });

@@ -4,7 +4,7 @@ using Microsoft.Extensions.Options;
 
 namespace ScaledDomains.Extensions.Caching.MySql
 {
-    public class MySqlServerCacheOptions : IOptions<MySqlServerCacheOptions>
+    public class MySqlServerCacheOptions
     {
         /// <summary>
         /// The connection string to the database.
@@ -23,10 +23,8 @@ namespace ScaledDomains.Extensions.Caching.MySql
         public TimeSpan DefaultSlidingExpiration { get; set; } = TimeSpan.FromMinutes(20);
 
         /// <summary>
-        /// For testing propose
+        /// For testing purposes
         /// </summary>
         internal ISystemClock SystemClock { get; set; } = new SystemClock();
-
-        public MySqlServerCacheOptions Value => this;
     }
 }
