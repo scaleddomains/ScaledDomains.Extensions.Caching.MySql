@@ -19,7 +19,7 @@ namespace ScaledDomains.Extensions.Caching.MySql
         {
             _options = options;
             var connectionStringBuilder = new MySqlConnectionStringBuilder(_options.ConnectionString);
-            
+
             _sqlCommands = new SqlCommands(connectionStringBuilder.Database, _options.TableName);
             _systemClock = _options.SystemClock;
         }
@@ -34,7 +34,7 @@ namespace ScaledDomains.Extensions.Caching.MySql
             using var command = new MySqlCommand(cmdText, connection);
 
             command.Parameters.Add(new MySqlParameter("@Id", MySqlDbType.VarString, 767) { Value = key });
-            command.Parameters.Add(new MySqlParameter("@UtcNow", MySqlDbType.Timestamp) { Value = utcNow  });
+            command.Parameters.Add(new MySqlParameter("@UtcNow", MySqlDbType.Timestamp) { Value = utcNow.UtcDateTime });
 
             connection.Open();
 
@@ -62,7 +62,7 @@ namespace ScaledDomains.Extensions.Caching.MySql
             using var command = new MySqlCommand(cmdText, connection);
 
             command.Parameters.Add(new MySqlParameter("@Id", MySqlDbType.VarString, 767) { Value = key });
-            command.Parameters.Add(new MySqlParameter("@UtcNow", MySqlDbType.Timestamp) { Value = utcNow  });
+            command.Parameters.Add(new MySqlParameter("@UtcNow", MySqlDbType.Timestamp) { Value = utcNow.UtcDateTime });
 
             await connection.OpenAsync(token).ConfigureAwait(false);
 
@@ -81,10 +81,10 @@ namespace ScaledDomains.Extensions.Caching.MySql
         public void SetCacheItem(string key, byte[] value, DistributedCacheEntryOptions options)
         {
             var utcNow = _systemClock.UtcNow;
-            
+
             var absoluteExpiration = GetAbsoluteExpiration(utcNow, options);
             ValidateOptions(options.SlidingExpiration, absoluteExpiration);
-            
+
             var cmdText = _sqlCommands.SetCache;
 
             using var connection = new MySqlConnection(_options.ConnectionString);
@@ -92,7 +92,7 @@ namespace ScaledDomains.Extensions.Caching.MySql
 
             command.Parameters.Add(new MySqlParameter("@Id", MySqlDbType.VarString, 767) { Value = key });
             command.Parameters.Add(new MySqlParameter("@Value", MySqlDbType.Blob) { Value = value });
-            command.Parameters.Add(new MySqlParameter("@UtcNow", MySqlDbType.Timestamp) { Value = utcNow  });
+            command.Parameters.Add(new MySqlParameter("@UtcNow", MySqlDbType.Timestamp) { Value = utcNow.UtcDateTime });
             command.Parameters.Add(new MySqlParameter("@SlidingExpiration", MySqlDbType.Time) { Value = (object)options.SlidingExpiration ?? DBNull.Value });
             command.Parameters.Add(new MySqlParameter("@AbsoluteExpiration", MySqlDbType.Timestamp) { Value = (object)absoluteExpiration?.UtcDateTime ?? DBNull.Value });
 
@@ -124,7 +124,7 @@ namespace ScaledDomains.Extensions.Caching.MySql
 
             command.Parameters.Add(new MySqlParameter("@Id", MySqlDbType.VarString, 767) { Value = key });
             command.Parameters.Add(new MySqlParameter("@Value", MySqlDbType.Blob) { Value = value });
-            command.Parameters.Add(new MySqlParameter("@UtcNow", MySqlDbType.Timestamp) { Value = utcNow  });
+            command.Parameters.Add(new MySqlParameter("@UtcNow", MySqlDbType.Timestamp) { Value = utcNow.UtcDateTime });
             command.Parameters.Add(new MySqlParameter("@SlidingExpiration", MySqlDbType.Time) { Value = (object)options.SlidingExpiration ?? DBNull.Value });
             command.Parameters.Add(new MySqlParameter("@AbsoluteExpiration", MySqlDbType.Timestamp) { Value = (object)absoluteExpiration?.UtcDateTime ?? DBNull.Value });
 
@@ -136,7 +136,7 @@ namespace ScaledDomains.Extensions.Caching.MySql
             }
             catch (MySqlException ex) when (!IsDuplicateKeyException(ex))
             {
-                
+
             }
         }
 
@@ -149,7 +149,7 @@ namespace ScaledDomains.Extensions.Caching.MySql
             using var command = new MySqlCommand(cmdText, connection);
 
             command.Parameters.Add(new MySqlParameter("@Id", MySqlDbType.VarString, 767) { Value = key });
-            command.Parameters.Add(new MySqlParameter("@UtcNow", MySqlDbType.Timestamp) { Value = utcNow });
+            command.Parameters.Add(new MySqlParameter("@UtcNow", MySqlDbType.Timestamp) { Value = utcNow.UtcDateTime });
 
             connection.Open();
 
@@ -165,7 +165,7 @@ namespace ScaledDomains.Extensions.Caching.MySql
             using var command = new MySqlCommand(cmdText, connection);
 
             command.Parameters.Add(new MySqlParameter("@Id", MySqlDbType.VarString, 767) { Value = key });
-            command.Parameters.Add(new MySqlParameter("@UtcNow", MySqlDbType.Timestamp) { Value = utcNow });
+            command.Parameters.Add(new MySqlParameter("@UtcNow", MySqlDbType.Timestamp) { Value = utcNow.UtcDateTime });
 
             await connection.OpenAsync(token).ConfigureAwait(false);
 
