@@ -1,10 +1,11 @@
 using System;
+using System.Runtime.CompilerServices;
 using Microsoft.Extensions.Internal;
 using Microsoft.Extensions.Options;
 
 namespace ScaledDomains.Extensions.Caching.MySql
 {
-    public class MySqlServerCacheOptions
+    public class MySqlServerCacheOptions : IOptions<MySqlServerCacheOptions>
     {
         /// <summary>
         /// The connection string to the database.
@@ -21,10 +22,18 @@ namespace ScaledDomains.Extensions.Caching.MySql
         /// By default, its 20 minutes.
         /// </summary>
         public TimeSpan DefaultSlidingExpiration { get; set; } = TimeSpan.FromMinutes(20);
+        
+        public MySqlServerCacheOptions Value { get => this; }
+
 
         /// <summary>
         /// For testing purposes
         /// </summary>
         internal ISystemClock SystemClock { get; set; } = new SystemClock();
+
+        internal MySqlServerCacheOptions Clone()
+        {
+            return (MySqlServerCacheOptions) MemberwiseClone();
+        }
     }
 }

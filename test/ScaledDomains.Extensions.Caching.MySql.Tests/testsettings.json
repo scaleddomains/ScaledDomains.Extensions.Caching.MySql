@@ -1,0 +1,6 @@
+{
+  "ScaledDomains.Extensions.Caching.MySql": {
+    "ConnectionString": "Server=localhost;Database=distributedCache-db;User=root;",
+    "TableName": "distributedCache"
+  } 
+}
