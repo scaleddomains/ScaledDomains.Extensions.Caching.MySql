@@ -9,7 +9,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScaledDomains.Extensions.Ca
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{4D85D81A-B805-4965-946B-DF1BDB9AC3A3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScaledDomains.Extensions.Caching.MySql.Tests", "test\ScaledDomains.Extensions.Caching.MySql.Tests\ScaledDomains.Extensions.Caching.MySql.Tests.csproj", "{76F26486-0042-4ED5-B47A-56E795B85BCB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScaledDomains.Extensions.Caching.MySql.Tests", "test\ScaledDomains.Extensions.Caching.MySql.Tests\ScaledDomains.Extensions.Caching.MySql.Tests.csproj", "{76F26486-0042-4ED5-B47A-56E795B85BCB}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{CF2C322D-8D98-4FAA-94C8-3C76463CA73D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ScaledDomains.Extensions.Caching.MySql.Tools", "tools\ScaledDomains.Extensions.Caching.MySql.Tools\ScaledDomains.Extensions.Caching.MySql.Tools.csproj", "{1A249BE7-A23C-4BEE-888A-0831A1868A55}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +49,18 @@ Global
 		{76F26486-0042-4ED5-B47A-56E795B85BCB}.Release|x64.Build.0 = Release|Any CPU
 		{76F26486-0042-4ED5-B47A-56E795B85BCB}.Release|x86.ActiveCfg = Release|Any CPU
 		{76F26486-0042-4ED5-B47A-56E795B85BCB}.Release|x86.Build.0 = Release|Any CPU
+		{1A249BE7-A23C-4BEE-888A-0831A1868A55}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1A249BE7-A23C-4BEE-888A-0831A1868A55}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1A249BE7-A23C-4BEE-888A-0831A1868A55}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{1A249BE7-A23C-4BEE-888A-0831A1868A55}.Debug|x64.Build.0 = Debug|Any CPU
+		{1A249BE7-A23C-4BEE-888A-0831A1868A55}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{1A249BE7-A23C-4BEE-888A-0831A1868A55}.Debug|x86.Build.0 = Debug|Any CPU
+		{1A249BE7-A23C-4BEE-888A-0831A1868A55}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1A249BE7-A23C-4BEE-888A-0831A1868A55}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1A249BE7-A23C-4BEE-888A-0831A1868A55}.Release|x64.ActiveCfg = Release|Any CPU
+		{1A249BE7-A23C-4BEE-888A-0831A1868A55}.Release|x64.Build.0 = Release|Any CPU
+		{1A249BE7-A23C-4BEE-888A-0831A1868A55}.Release|x86.ActiveCfg = Release|Any CPU
+		{1A249BE7-A23C-4BEE-888A-0831A1868A55}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -52,6 +68,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{9DFC0229-D0F4-4DCD-958B-641166B0446C} = {8A699C38-1029-45D3-804A-F3E5C161835D}
 		{76F26486-0042-4ED5-B47A-56E795B85BCB} = {4D85D81A-B805-4965-946B-DF1BDB9AC3A3}
+		{1A249BE7-A23C-4BEE-888A-0831A1868A55} = {CF2C322D-8D98-4FAA-94C8-3C76463CA73D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4007F70F-7F1C-49B5-B381-9C78BB4A8423}
