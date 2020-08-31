@@ -1,0 +1,7 @@
+{
+  "profiles": {
+    "ScaledDomains.Extensions.Caching.MySql.Tools": {
+      "commandName": "Project"
+    }
+  }
+}
