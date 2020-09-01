@@ -31,8 +31,8 @@ jobs:
       run: docker-compose -f test/docker/docker-compose.yml up -d
     - name: Check running containers
       run: docker ps -a
-    - name: wait-for-it
-      run: ./test/docker/wait-for-it.sh localhost:3306
+    - name: Wait for MySQL to come up
+      run: docker-compose -f test/docker/docker-compose.yml exec db bash -c 'while ! mysql --protocol TCP -e "show databases;" > /dev/null 2>&1; do sleep 1; done'
     - name: Test
       run: dotnet test --no-restore --verbosity normal
     - name: Destroy testing environemnt stack
