@@ -131,6 +131,9 @@ _TeamCity*
 # DotCover is a Code Coverage Tool
 *.dotCover
 
+# Coverlet is a Code Coverage Tool
+coverage.opencover.xml
+
 # AxoCover is a Code Coverage Tool
 .axoCover/*
 !.axoCover/settings.json

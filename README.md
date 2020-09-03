@@ -6,6 +6,7 @@ ScaledDomains.Extensions.Caching.MySql is a free, open source distributed cache 
 
 ![Build](https://github.com/scaleddomains/ScaledDomains.Extensions.Caching.MySql/workflows/build/badge.svg?branch=master)
 ![License](https://img.shields.io/github/license/scaleddomains/ScaledDomains.Extensions.Caching.MySql)
+[![codecov](https://codecov.io/gh/scaleddomains/ScaledDomains.Extensions.Caching.MySql/branch/master/graph/badge.svg)](https://codecov.io/gh/scaleddomains/ScaledDomains.Extensions.Caching.MySql)
 
 ## Bug reports and feature requests
 
