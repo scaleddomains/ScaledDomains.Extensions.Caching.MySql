@@ -44,22 +44,26 @@ namespace ScaledDomains.Extensions.Caching.MySql
         }
 
         /// <inheritdoc />
-        public Task<byte[]> GetAsync(string key, CancellationToken token = new CancellationToken())
+        public async Task<byte[]> GetAsync(string key, CancellationToken token = new CancellationToken())
         {
             ValidateKey(key);
 
-            return _databaseOperations.GetCacheItemAsync(key, token);
+            return await _databaseOperations.GetCacheItemAsync(key, token);
         }
 
         public void Set(string key, byte[] value, DistributedCacheEntryOptions options)
         {
-            throw new NotImplementedException();
+           ValidateKey(key);
+
+           _databaseOperations.SetCacheItem(key, value, options);
         }
 
-        public Task SetAsync(string key, byte[] value, DistributedCacheEntryOptions options,
+        public async Task SetAsync(string key, byte[] value, DistributedCacheEntryOptions options,
             CancellationToken token = new CancellationToken())
         {
-            throw new NotImplementedException();
+            ValidateKey(key);
+
+            await _databaseOperations.SetCacheItemAsync(key, value, options, token);
         }
 
         /// <inheritdoc />
@@ -71,21 +75,25 @@ namespace ScaledDomains.Extensions.Caching.MySql
         }
 
         /// <inheritdoc />
-        public Task RefreshAsync(string key, CancellationToken token = new CancellationToken())
+        public async Task RefreshAsync(string key, CancellationToken token = new CancellationToken())
         {
             ValidateKey(key);
 
-            return _databaseOperations.RefreshCacheItemAsync(key, token);
+            await _databaseOperations.RefreshCacheItemAsync(key, token);
         }
 
         public void Remove(string key)
         {
-            throw new NotImplementedException();
+            ValidateKey(key);
+
+            _databaseOperations.DeleteCacheItem(key);
         }
 
-        public Task RemoveAsync(string key, CancellationToken token = new CancellationToken())
+        public async Task RemoveAsync(string key, CancellationToken token = new CancellationToken())
         {
-            throw new NotImplementedException();
+            ValidateKey(key);
+
+            await _databaseOperations.DeleteCacheItemAsync(key, token);
         }
 
         private static void ValidateKey(string key)

@@ -28,7 +28,7 @@ namespace ScaledDomains.Extensions.Caching.MySql
         {
             var utcNow = _systemClock.UtcNow;
 
-            var cmdText = _sqlCommands.GetCache;
+            var cmdText = _sqlCommands.GetCacheItem;
 
             using var connection = new MySqlConnection(_options.ConnectionString);
             using var command = new MySqlCommand(cmdText, connection);
@@ -56,7 +56,7 @@ namespace ScaledDomains.Extensions.Caching.MySql
 
             var utcNow = _systemClock.UtcNow;
 
-            var cmdText = _sqlCommands.GetCache;
+            var cmdText = _sqlCommands.GetCacheItem;
 
             using var connection = new MySqlConnection(_options.ConnectionString);
             using var command = new MySqlCommand(cmdText, connection);
@@ -85,7 +85,7 @@ namespace ScaledDomains.Extensions.Caching.MySql
             var absoluteExpiration = GetAbsoluteExpiration(utcNow, options);
             ValidateOptions(options.SlidingExpiration, absoluteExpiration);
 
-            var cmdText = _sqlCommands.SetCache;
+            var cmdText = _sqlCommands.SetCacheItem;
 
             using var connection = new MySqlConnection(_options.ConnectionString);
             using var command = new MySqlCommand(cmdText, connection);
@@ -117,7 +117,7 @@ namespace ScaledDomains.Extensions.Caching.MySql
             var absoluteExpiration = GetAbsoluteExpiration(utcNow, options);
             ValidateOptions(options.SlidingExpiration, absoluteExpiration);
 
-            var cmdText = _sqlCommands.SetCache;
+            var cmdText = _sqlCommands.SetCacheItem;
 
             using var connection = new MySqlConnection(_options.ConnectionString);
             using var command = new MySqlCommand(cmdText, connection);
@@ -142,7 +142,7 @@ namespace ScaledDomains.Extensions.Caching.MySql
 
         public void RefreshCacheItem(string key)
         {
-            var cmdText = _sqlCommands.RefreshCache;
+            var cmdText = _sqlCommands.RefreshCacheItem;
             var utcNow = _systemClock.UtcNow;
 
             using var connection = new MySqlConnection(_options.ConnectionString);
@@ -158,7 +158,7 @@ namespace ScaledDomains.Extensions.Caching.MySql
 
         public async Task RefreshCacheItemAsync(string key, CancellationToken token = default)
         {
-            var cmdText = _sqlCommands.RefreshCache;
+            var cmdText = _sqlCommands.RefreshCacheItem;
             var utcNow = _systemClock.UtcNow;
 
             using var connection = new MySqlConnection(_options.ConnectionString);
@@ -172,7 +172,35 @@ namespace ScaledDomains.Extensions.Caching.MySql
             await command.ExecuteNonQueryAsync(token).ConfigureAwait(false);
         }
 
-        private bool IsDuplicateKeyException(MySqlException ex) => ex.ErrorCode == (int)MySqlErrorCode.DuplicateKey; //TODO: must be tested
+        public void DeleteCacheItem(string key)
+        {
+            var cmdText = _sqlCommands.DeleteCacheItem;
+
+            using var connection = new MySqlConnection(_options.ConnectionString);
+            using var command = new MySqlCommand(cmdText, connection);
+
+            command.Parameters.Add(new MySqlParameter("@Id", MySqlDbType.VarString, 767) { Value = key });
+
+            connection.Open();
+
+            command.ExecuteNonQuery();
+        }
+
+        public async Task DeleteCacheItemAsync(string key, CancellationToken token = default)
+        {
+            var cmdText = _sqlCommands.DeleteCacheItem;
+
+            using var connection = new MySqlConnection(_options.ConnectionString);
+            using var command = new MySqlCommand(cmdText, connection);
+
+            command.Parameters.Add(new MySqlParameter("@Id", MySqlDbType.VarString, 767) { Value = key });
+
+            await connection.OpenAsync(token).ConfigureAwait(false);
+
+            await command.ExecuteNonQueryAsync(token).ConfigureAwait(false);
+        }
+
+        private static bool IsDuplicateKeyException(MySqlException ex) => ex.Number == (int)MySqlErrorCode.DuplicateKey;
 
         private static DateTimeOffset? GetAbsoluteExpiration(DateTimeOffset utcNow, DistributedCacheEntryOptions options)
         {
@@ -194,7 +222,7 @@ namespace ScaledDomains.Extensions.Caching.MySql
             return null;
         }
 
-        private void ValidateOptions(TimeSpan? slidingExpiration, DateTimeOffset? absoluteExpiration)
+        private static void ValidateOptions(TimeSpan? slidingExpiration, DateTimeOffset? absoluteExpiration)
         {
             if (!slidingExpiration.HasValue && !absoluteExpiration.HasValue)
             {
