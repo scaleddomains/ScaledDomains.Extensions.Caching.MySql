@@ -17,5 +17,9 @@ namespace ScaledDomains.Extensions.Caching.MySql
         void RefreshCacheItem(string key);
 
         Task RefreshCacheItemAsync(string key, CancellationToken token = default);
+
+        void DeleteCacheItem(string key);
+
+        Task DeleteCacheItemAsync(string key, CancellationToken token = default);
     }
 }

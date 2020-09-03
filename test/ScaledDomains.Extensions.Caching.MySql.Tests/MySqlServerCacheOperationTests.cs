@@ -1,10 +1,7 @@
 using System;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Internal;
-using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
@@ -200,7 +197,7 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tests
                 SlidingExpiration = TimeSpan.FromHours(1)
             };
 
-            base.CreateCacheItem(testItem);
+            CreateCacheItem(testItem);
 
             // Act
 
@@ -211,6 +208,82 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tests
             var actualItem = GetCacheItem(testItem.Id);
 
             Assert.AreEqual(_utcNow.Add(testItem.SlidingExpiration.Value).UtcDateTime, actualItem.ExpiresAt);
+        }
+
+        [TestMethod]
+        public void Remove_ExistingNonExporedItem_ShouldRemoveItem()
+        {
+            // Arrange
+
+            var testItem = new CacheItem
+            {
+                Id = "myKey",
+                ExpiresAt = _notExpired.UtcDateTime,
+                Value = Guid.NewGuid().ToByteArray(),
+                SlidingExpiration = TimeSpan.FromHours(1)
+            };
+
+            CreateCacheItem(testItem);
+
+            // Act
+
+            _mySqlServerCache.Remove(testItem.Id);
+
+            // Assert
+
+            var actualItem = GetCacheItem(testItem.Id);
+
+            Assert.IsNull(actualItem);
+        }
+
+        [TestMethod]
+        public async Task RemoveAsync_ExistingNonExporedItem_ShouldRemoveItem()
+        {
+            // Arrange
+
+            var testItem = new CacheItem
+            {
+                Id = "myKey",
+                ExpiresAt = _notExpired.UtcDateTime,
+                Value = Guid.NewGuid().ToByteArray(),
+                SlidingExpiration = TimeSpan.FromHours(1)
+            };
+
+            CreateCacheItem(testItem);
+
+            // Act
+
+            await _mySqlServerCache.RemoveAsync(testItem.Id);
+
+            // Assert
+
+            var actualItem = GetCacheItem(testItem.Id);
+
+            Assert.IsNull(actualItem);
+        }
+
+        [TestMethod]
+        public void Remove_NonExistingItem_ShouldNotFail()
+        {
+            // Arrange
+
+            var id = "nonExistingItemKey";
+
+            // Act & Assert
+
+            _mySqlServerCache.Remove(id);
+        }
+
+        [TestMethod]
+        public async Task RemoveAsync_NonExistingItem_ShouldNotFail()
+        {
+            // Arrange
+
+            var id = "nonExistingItemKey";
+
+            // Act & Assert
+
+            await _mySqlServerCache.RemoveAsync(id);
         }
     }
 }

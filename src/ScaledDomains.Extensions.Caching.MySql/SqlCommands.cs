@@ -6,18 +6,20 @@ namespace ScaledDomains.Extensions.Caching.MySql
         {
             var fullName = $"`{schemaName}`.`{tableName}`";
 
-            GetCache = string.Format(UpdateCacheFormat + GetCacheFormat, fullName);
-            SetCache = string.Format(SetCacheFormat, fullName);
-            RefreshCache = string.Format(UpdateCacheFormat, fullName);
+            GetCacheItem = string.Format(UpdateCacheItemFormat + GetCacheItemFormat, fullName);
+            SetCacheItem = string.Format(SetCacheItemFormat, fullName);
+            RefreshCacheItem = string.Format(UpdateCacheItemFormat, fullName);
+            DeleteCacheItem = string.Format(DeleteCacheItemFormat, fullName);
         }
 
-        private const string GetCacheFormat = "SELECT Value FROM {0} WHERE Id = @Id AND ExpiresAt >= @UtcNow; ";
+        private const string GetCacheItemFormat = 
+            "SELECT Value FROM {0} WHERE Id = @Id AND ExpiresAt >= @UtcNow; ";
 
-        private const string UpdateCacheFormat =
+        private const string UpdateCacheItemFormat =
             "UPDATE {0} SET ExpiresAt = (CASE WHEN (SlidingExpiration IS NUll) THEN AbsoluteExpiration ELSE ADDTIME(@UtcNow, SlidingExpiration) END) " +
             "WHERE Id = @Id AND ExpiresAt >= @UtcNow AND SlidingExpiration IS NOT NULL AND (AbsoluteExpiration IS NULL OR AbsoluteExpiration >= ExpiresAt); ";
             
-        private const string SetCacheFormat = 
+        private const string SetCacheItemFormat = 
             "INSERT INTO {0} (Id, Value, ExpiresAt, SlidingExpiration, AbsoluteExpiration) VALUES (@Id, @Value, @ExpiresAt, @SlidingExpiration, @AbsoluteExpiration) " +
             "ON DUPLICATE KEY UPDATE " +
             "Value = @Value, " +
@@ -25,10 +27,15 @@ namespace ScaledDomains.Extensions.Caching.MySql
             "SlidingExpiration = @SlidingExpiration, "+
             "AbsoluteExpiration = @AbsoluteExpiration;";
 
-        internal readonly string GetCache;
+        private const string DeleteCacheItemFormat = 
+            "DELETE FROM {0} WHERE Id = @Id";
 
-        internal readonly string SetCache;
+        internal readonly string GetCacheItem;
 
-        internal readonly string RefreshCache;
+        internal readonly string SetCacheItem;
+
+        internal readonly string RefreshCacheItem;
+
+        internal readonly string DeleteCacheItem;
     }
 }
