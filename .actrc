@@ -1,1 +1,5 @@
--P ubuntu-latest=nektos/act-environments-ubuntu:18.04 --verbose --reuse --env-file ./.act-env --bind
+-v
+-r
+-b
+-P ubuntu-latest=nektos/act-environments-ubuntu:18.04
+--env-file=./.act-env
