@@ -22,5 +22,27 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tests
         {
             _ = new MySqlServerCache(null);
         }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void CreateAnInstance_WithNullTableName_ShouldThrowArgumentNullException()
+        {
+            _ = new MySqlServerCache(new MySqlServerCacheOptions
+            {
+                ConnectionString = "Server=example.com;Database=db;User=root;",
+                TableName = null
+            });
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void CreateAnInstance_WithNullConnectionString_ShouldThrowArgumentNullException()
+        {
+            _ = new MySqlServerCache(new MySqlServerCacheOptions
+            {
+                ConnectionString = null,
+                TableName = "table"
+            });
+        }
     }
 }

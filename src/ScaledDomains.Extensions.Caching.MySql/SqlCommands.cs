@@ -10,6 +10,7 @@ namespace ScaledDomains.Extensions.Caching.MySql
             SetCacheItem = string.Format(SetCacheItemFormat, fullName);
             RefreshCacheItem = string.Format(UpdateCacheItemFormat, fullName);
             DeleteCacheItem = string.Format(DeleteCacheItemFormat, fullName);
+            DeleteExpiredCacheItems = string.Format(DeleteExpiredCacheItemsFormat, fullName);
         }
 
         private const string GetCacheItemFormat = 
@@ -30,6 +31,8 @@ namespace ScaledDomains.Extensions.Caching.MySql
         private const string DeleteCacheItemFormat = 
             "DELETE FROM {0} WHERE Id = @Id";
 
+        public const string DeleteExpiredCacheItemsFormat = "DELETE FROM {0} WHERE ExpiresAt < @UtcNow";
+
         internal readonly string GetCacheItem;
 
         internal readonly string SetCacheItem;
@@ -37,5 +40,7 @@ namespace ScaledDomains.Extensions.Caching.MySql
         internal readonly string RefreshCacheItem;
 
         internal readonly string DeleteCacheItem;
+
+        internal readonly string DeleteExpiredCacheItems;
     }
 }
