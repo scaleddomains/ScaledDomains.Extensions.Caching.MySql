@@ -4,3 +4,4 @@
 -P ubuntu-latest=nektos/act-environments-ubuntu:18.04
 --env-file=./.act-env
 -s CODECOV_TOKEN
+-s GITHUB_TOKEN
