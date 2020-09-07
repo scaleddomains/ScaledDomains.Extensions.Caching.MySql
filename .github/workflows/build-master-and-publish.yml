@@ -1,9 +1,7 @@
-name: build
+name: build-master-and-publish
 
 on:
   push:
-    branches: [ master ]
-  pull_request:
     branches: [ master ]
     
 jobs:
@@ -59,3 +57,7 @@ jobs:
         echo "NuGetPreReleaseTag: ${{ steps.gitversion.outputs.nuGetPreReleaseTag }}"
         echo "CommitsSinceVersionSource: ${{ steps.gitversion.outputs.CommitsSinceVersionSourcePadded }}"
         echo "BranchName: ${{ steps.gitversion.outputs.branchName }}"
+    - name: Pack
+      run: dotnet pack src/ScaledDomains.Extensions.Caching.MySql/ScaledDomains.Extensions.Caching.MySql.csproj -p:PackageVersion=${{ steps.gitversion.outputs.nuGetVersionV2 }} --output nuget-packages --configuration Release --no-build --no-restore
+    - name: Push
+      run: dotnet nuget push nuget-packages/*.nupkg --api-key ${{ secrets.GITHUB_TOKEN }} --source https://nuget.pkg.github.com/scaleddomains/index.

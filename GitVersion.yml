@@ -1,0 +1,11 @@
+mode: ContinuousDeployment
+continuous-delivery-fallback-tag: ''
+branches:
+  master:
+    is-release-branch: true
+  feature:
+    tag: useBranchName
+  pull-request: {}
+ignore:
+  sha: []
+merge-message-formats: {}
