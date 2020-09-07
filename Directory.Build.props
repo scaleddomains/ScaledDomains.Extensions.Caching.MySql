@@ -1,0 +1,7 @@
+<Project>
+  <PropertyGroup>
+    <Authors>Attila Ersek;Endre Toth</Authors>
+    <PackageDescription>This package adds an Octocat!</PackageDescription>
+    <RepositoryUrl>https://github.com/scaleddomains/ScaledDomains.Extensions.Caching.MySql</RepositoryUrl>
+  </PropertyGroup>
+</Project>
