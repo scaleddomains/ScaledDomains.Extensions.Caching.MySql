@@ -61,5 +61,6 @@ jobs:
       run: dotnet pack src/ScaledDomains.Extensions.Caching.MySql/ScaledDomains.Extensions.Caching.MySql.csproj -p:PackageVersion=${{ steps.gitversion.outputs.nuGetVersionV2 }} --output nuget-packages --configuration Release --no-build --no-restore
     - name: Push
       run: |
-        dotnet nuget add source https://nuget.pkg.github.com/scaleddomains/index.json -n github -u scaleddomains -p ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text
-        dotnet nuget push nuget-packages/*.nupkg --source "github" --no-symbols true --skip-duplicate true
+        dotnet nuget add source https://nuget.pkg.github.com/scaleddomains/index.json -n scaleddomains -u scaleddomains -p ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --configfile ./NuGet.Config && \
+        dotnet nuget push nuget-packages/*.nupkg --api-key ${{ secrets.GITHUB_TOKEN }} --source scaleddomains --no-symbols true --skip-duplicate true && \
+        dotnet nuget remove source scaleddomains
