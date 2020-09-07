@@ -4,7 +4,7 @@
 
 ScaledDomains.Extensions.Caching.MySql is a free, open source distributed cache implementation using MySql as datastore, inspired by [Microsoft.Extensions.Cachning.SqlServer](https://www.nuget.org/packages/Microsoft.Extensions.Caching.SqlServer). Founded and maintained by [Endre Toth](https://github.com/endret) and [Attila Ersek](https://github.com/attilaersek).
 
-![Build](https://github.com/scaleddomains/ScaledDomains.Extensions.Caching.MySql/workflows/build/badge.svg?branch=master)
+![Build](https://github.com/scaleddomains/ScaledDomains.Extensions.Caching.MySql/workflows/build-master-and-publish/badge.svg?branch=master)
 ![License](https://img.shields.io/github/license/scaleddomains/ScaledDomains.Extensions.Caching.MySql)
 [![codecov](https://codecov.io/gh/scaleddomains/ScaledDomains.Extensions.Caching.MySql/branch/master/graph/badge.svg)](https://codecov.io/gh/scaleddomains/ScaledDomains.Extensions.Caching.MySql)
 
