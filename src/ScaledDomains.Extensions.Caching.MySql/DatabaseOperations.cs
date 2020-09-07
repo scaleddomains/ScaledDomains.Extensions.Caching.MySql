@@ -11,6 +11,8 @@ namespace ScaledDomains.Extensions.Caching.MySql
 {
     internal sealed class DatabaseOperations : IDatabaseOperations
     {
+        internal const int IdColumnSize = 767;
+
         private readonly SqlCommands _sqlCommands;
         private readonly ISystemClock _systemClock;
         private readonly MySqlServerCacheOptions _options;
@@ -33,7 +35,7 @@ namespace ScaledDomains.Extensions.Caching.MySql
             using var connection = new MySqlConnection(_options.ConnectionString);
             using var command = new MySqlCommand(cmdText, connection);
 
-            command.Parameters.Add(new MySqlParameter("@Id", MySqlDbType.VarString, 767) { Value = key });
+            command.Parameters.Add(new MySqlParameter("@Id", MySqlDbType.VarString, IdColumnSize) { Value = key });
             command.Parameters.Add(new MySqlParameter("@UtcNow", MySqlDbType.Timestamp) { Value = utcNow.UtcDateTime });
 
             connection.Open();
@@ -61,7 +63,7 @@ namespace ScaledDomains.Extensions.Caching.MySql
             using var connection = new MySqlConnection(_options.ConnectionString);
             using var command = new MySqlCommand(cmdText, connection);
 
-            command.Parameters.Add(new MySqlParameter("@Id", MySqlDbType.VarString, 767) { Value = key });
+            command.Parameters.Add(new MySqlParameter("@Id", MySqlDbType.VarString, IdColumnSize) { Value = key });
             command.Parameters.Add(new MySqlParameter("@UtcNow", MySqlDbType.Timestamp) { Value = utcNow.UtcDateTime });
 
             await connection.OpenAsync(token).ConfigureAwait(false);
@@ -89,8 +91,8 @@ namespace ScaledDomains.Extensions.Caching.MySql
 
             using var connection = new MySqlConnection(_options.ConnectionString);
             using var command = new MySqlCommand(cmdText, connection);
-
-            command.Parameters.Add(new MySqlParameter("@Id", MySqlDbType.VarString, 767) { Value = key });
+            
+            command.Parameters.Add(new MySqlParameter("@Id", MySqlDbType.VarString, IdColumnSize) { Value = key });
             command.Parameters.Add(new MySqlParameter("@Value", MySqlDbType.Blob) { Value = value });
             command.Parameters.Add(new MySqlParameter("@UtcNow", MySqlDbType.Timestamp) { Value = utcNow.UtcDateTime });
             command.Parameters.Add(new MySqlParameter("@SlidingExpiration", MySqlDbType.Time) { Value = (object)options.SlidingExpiration ?? DBNull.Value });
@@ -122,7 +124,7 @@ namespace ScaledDomains.Extensions.Caching.MySql
             using var connection = new MySqlConnection(_options.ConnectionString);
             using var command = new MySqlCommand(cmdText, connection);
 
-            command.Parameters.Add(new MySqlParameter("@Id", MySqlDbType.VarString, 767) { Value = key });
+            command.Parameters.Add(new MySqlParameter("@Id", MySqlDbType.VarString, IdColumnSize) { Value = key });
             command.Parameters.Add(new MySqlParameter("@Value", MySqlDbType.Blob) { Value = value });
             command.Parameters.Add(new MySqlParameter("@UtcNow", MySqlDbType.Timestamp) { Value = utcNow.UtcDateTime });
             command.Parameters.Add(new MySqlParameter("@SlidingExpiration", MySqlDbType.Time) { Value = (object)options.SlidingExpiration ?? DBNull.Value });
@@ -148,7 +150,7 @@ namespace ScaledDomains.Extensions.Caching.MySql
             using var connection = new MySqlConnection(_options.ConnectionString);
             using var command = new MySqlCommand(cmdText, connection);
 
-            command.Parameters.Add(new MySqlParameter("@Id", MySqlDbType.VarString, 767) { Value = key });
+            command.Parameters.Add(new MySqlParameter("@Id", MySqlDbType.VarString, IdColumnSize) { Value = key });
             command.Parameters.Add(new MySqlParameter("@UtcNow", MySqlDbType.Timestamp) { Value = utcNow.UtcDateTime });
 
             connection.Open();
@@ -164,7 +166,7 @@ namespace ScaledDomains.Extensions.Caching.MySql
             using var connection = new MySqlConnection(_options.ConnectionString);
             using var command = new MySqlCommand(cmdText, connection);
 
-            command.Parameters.Add(new MySqlParameter("@Id", MySqlDbType.VarString, 767) { Value = key });
+            command.Parameters.Add(new MySqlParameter("@Id", MySqlDbType.VarString, IdColumnSize) { Value = key });
             command.Parameters.Add(new MySqlParameter("@UtcNow", MySqlDbType.Timestamp) { Value = utcNow.UtcDateTime });
 
             await connection.OpenAsync(token).ConfigureAwait(false);
@@ -179,7 +181,7 @@ namespace ScaledDomains.Extensions.Caching.MySql
             using var connection = new MySqlConnection(_options.ConnectionString);
             using var command = new MySqlCommand(cmdText, connection);
 
-            command.Parameters.Add(new MySqlParameter("@Id", MySqlDbType.VarString, 767) { Value = key });
+            command.Parameters.Add(new MySqlParameter("@Id", MySqlDbType.VarString, IdColumnSize) { Value = key });
 
             connection.Open();
 
@@ -193,7 +195,23 @@ namespace ScaledDomains.Extensions.Caching.MySql
             using var connection = new MySqlConnection(_options.ConnectionString);
             using var command = new MySqlCommand(cmdText, connection);
 
-            command.Parameters.Add(new MySqlParameter("@Id", MySqlDbType.VarString, 767) { Value = key });
+            command.Parameters.Add(new MySqlParameter("@Id", MySqlDbType.VarString, IdColumnSize) { Value = key });
+
+            await connection.OpenAsync(token).ConfigureAwait(false);
+
+            await command.ExecuteNonQueryAsync(token).ConfigureAwait(false);
+        }
+
+        public async Task DeleteExpiredCacheItemsAsync(CancellationToken token = default)
+        {
+            var utcNow = _systemClock.UtcNow;
+
+            var cmdText = _sqlCommands.DeleteExpiredCacheItems;
+
+            using var connection = new MySqlConnection(_options.ConnectionString);
+            using var command = new MySqlCommand(cmdText, connection);
+
+            command.Parameters.Add(new MySqlParameter("@UtcNow", MySqlDbType.Timestamp) { Value = utcNow.UtcDateTime });
 
             await connection.OpenAsync(token).ConfigureAwait(false);
 

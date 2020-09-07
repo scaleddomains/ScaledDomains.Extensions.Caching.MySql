@@ -11,13 +11,16 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tests
     {
         private static readonly string TableName = TestConfiguration.MySqlServerCacheOptions.TableName;
         private static readonly string ConnectionString = TestConfiguration.MySqlServerCacheOptions.ConnectionString;
+        
+        protected readonly DateTimeOffset _utcNow = new DateTimeOffset(2020, 8, 30, 1, 10, 54, TimeSpan.Zero);
 
-        protected static IDistributedCache CreateMySqlServerCache(ISystemClock clock = null)
+        internal static IDistributedCache CreateMySqlServerCache(ISystemClock clock = null, IDatabaseOperations databaseOperations = null)
         {
             if (clock != null)
             {
                 var options = TestConfiguration.MySqlServerCacheOptions.Clone();
                 options.SystemClock = clock;
+                options.DatabaseOperations = databaseOperations;
 
                 return new MySqlServerCache(options);
             }

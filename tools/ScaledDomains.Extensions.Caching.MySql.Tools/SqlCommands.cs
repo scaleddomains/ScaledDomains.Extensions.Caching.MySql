@@ -28,7 +28,7 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tools
         private const string DropTableFormat = "DROP TABLE IF EXISTS {0}; ";
 
         private const string CreateTableFormat = "CREATE TABLE {0} (" +
-                                                 "`Id` varchar(449) CHARACTER SET ascii COLLATE ascii_bin NOT NULL," +
+                                                 "`Id` varchar(767) CHARACTER SET ascii COLLATE ascii_bin NOT NULL," +
                                                  "`AbsoluteExpiration` datetime(6) DEFAULT NULL," +
                                                  "`ExpiresAt` datetime(6) NOT NULL," +
                                                  "`SlidingExpiration` time DEFAULT NULL," +

@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Internal;
@@ -15,7 +16,6 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tests
 
         private readonly Mock<ISystemClock> _clock;
 
-        private readonly DateTimeOffset _utcNow = new DateTimeOffset(2020, 8, 30, 1, 10, 54, TimeSpan.Zero);
         private readonly DateTimeOffset _expired;
         private readonly DateTimeOffset _notExpired;
 
@@ -133,6 +133,18 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tests
         }
 
         [TestMethod]
+        public void Get_ItemDoesNotExist_ShouldReturnsNull()
+        {
+            // Act
+
+            var actualItem = _mySqlServerCache.Get(Guid.NewGuid().ToString());
+
+            // Assert
+
+            Assert.IsNull(actualItem);
+        }
+
+        [TestMethod]
         public void Refresh_NotExpiredItem_ShouldUpdateExpiresAt()
         {
             // Arrange
@@ -159,7 +171,7 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tests
         }
 
         [TestMethod]
-        public void Refresh_ExpiredItem_ShouldUpdateExpiresAt()
+        public void Refresh_ExpiredItem_ShouldNotUpdateExpiresAt()
         {
             // Arrange
 
@@ -211,7 +223,7 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tests
         }
 
         [TestMethod]
-        public void Remove_ExistingNonExporedItem_ShouldRemoveItem()
+        public void Remove_ExistingNonExpiredItem_ShouldRemoveItem()
         {
             // Arrange
 
@@ -237,7 +249,7 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tests
         }
 
         [TestMethod]
-        public async Task RemoveAsync_ExistingNonExporedItem_ShouldRemoveItem()
+        public async Task RemoveAsync_ExistingNonExpiredItem_ShouldRemoveItem()
         {
             // Arrange
 
@@ -284,6 +296,35 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tests
             // Act & Assert
 
             await _mySqlServerCache.RemoveAsync(id);
+        }
+
+        [Ignore]
+        [TestMethod]
+        public void Set_ShouldReturnsStoreItemIntoDatabase()
+        {
+            // Arrange
+
+            var testItem = new CacheItem
+            {
+                Id = "myKey",
+                ExpiresAt = _expired.UtcDateTime,
+                Value = Guid.NewGuid().ToByteArray()
+            };
+
+            // Act
+
+            _mySqlServerCache.Set(
+                testItem.Id,
+                testItem.Value,
+                new DistributedCacheEntryOptions {SlidingExpiration = TimeSpan.FromHours(1)});
+
+            // Assert
+
+            var actualItem = base.GetCacheItem(testItem.Id);
+
+            Assert.IsNotNull(actualItem);
+            CollectionAssert.AreEquivalent(testItem.Value, actualItem.Value);
+            Assert.AreEqual(testItem.ExpiresAt, actualItem.ExpiresAt);
         }
     }
 }

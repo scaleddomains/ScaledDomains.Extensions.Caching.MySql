@@ -1,8 +1,10 @@
 using System;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Internal;
 
 namespace ScaledDomains.Extensions.Caching.MySql
 {
@@ -11,10 +13,10 @@ namespace ScaledDomains.Extensions.Caching.MySql
     /// </summary>
     public class MySqlServerCache : IDistributedCache
     {
-        private const int MaxKeyLength = 255;
-
         private readonly IDatabaseOperations _databaseOperations;
 
+        private readonly ISystemClock _clock;
+        
         public MySqlServerCache(IOptions<MySqlServerCacheOptions> options)
         {
             if (options == null)
@@ -22,17 +24,11 @@ namespace ScaledDomains.Extensions.Caching.MySql
                 throw new ArgumentNullException(nameof(options), $"{nameof(options)} cannot be null.");
             }
 
-            if (string.IsNullOrWhiteSpace(options.Value.ConnectionString))
-            {
-                throw new ArgumentNullException(nameof(options.Value.ConnectionString), $"{nameof(options.Value.ConnectionString)} cannot be null or empty.");
-            }
+            options.Value.Validate();
 
-            if (string.IsNullOrWhiteSpace(options.Value.TableName))
-            {
-                throw new ArgumentNullException(nameof(options.Value.TableName), $"{nameof(options.Value.TableName)} cannot be null or empty.");
-            }
+            _databaseOperations = options.Value.DatabaseOperations ?? new DatabaseOperations(options.Value);
 
-            _databaseOperations = new DatabaseOperations(options.Value);
+            _clock = options.Value.SystemClock;
         }
 
         /// <inheritdoc />
@@ -40,7 +36,9 @@ namespace ScaledDomains.Extensions.Caching.MySql
         {
             ValidateKey(key);
 
-            return _databaseOperations.GetCacheItem(key);
+            var result = _databaseOperations.GetCacheItem(key);
+
+            return result;
         }
 
         /// <inheritdoc />
@@ -48,7 +46,9 @@ namespace ScaledDomains.Extensions.Caching.MySql
         {
             ValidateKey(key);
 
-            return await _databaseOperations.GetCacheItemAsync(key, token);
+            var result = await _databaseOperations.GetCacheItemAsync(key, token);
+
+            return result;
         }
 
         public void Set(string key, byte[] value, DistributedCacheEntryOptions options)
@@ -103,9 +103,11 @@ namespace ScaledDomains.Extensions.Caching.MySql
                 throw new ArgumentNullException(nameof(key), $"{nameof(key)} cannot be null or empty.");
             }
 
-            if (key.Length >= MaxKeyLength)
+            var s = Encoding.ASCII.GetString(Encoding.Default.GetBytes(key));
+
+            if (key.Length > DatabaseOperations.IdColumnSize)
             {
-                throw new ArgumentOutOfRangeException(nameof(key), key.Length, $"{nameof(key)} length cannot be more than {MaxKeyLength}.");
+                throw new ArgumentOutOfRangeException(nameof(key), key.Length, $"{nameof(key)} length cannot be more than {DatabaseOperations.IdColumnSize}.");
             }
         }
     }
