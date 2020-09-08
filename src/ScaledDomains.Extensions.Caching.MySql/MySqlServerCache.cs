@@ -15,8 +15,6 @@ namespace ScaledDomains.Extensions.Caching.MySql
     {
         private readonly IDatabaseOperations _databaseOperations;
 
-        private readonly ISystemClock _clock;
-        
         public MySqlServerCache(IOptions<MySqlServerCacheOptions> options)
         {
             if (options == null)
@@ -27,8 +25,6 @@ namespace ScaledDomains.Extensions.Caching.MySql
             options.Value.Validate();
 
             _databaseOperations = options.Value.DatabaseOperations ?? new DatabaseOperations(options.Value);
-
-            _clock = options.Value.SystemClock;
         }
 
         /// <inheritdoc />
@@ -51,17 +47,34 @@ namespace ScaledDomains.Extensions.Caching.MySql
             return result;
         }
 
+        /// <inheritdoc />
         public void Set(string key, byte[] value, DistributedCacheEntryOptions options)
         {
-           ValidateKey(key);
+            ValidateKey(key);
 
-           _databaseOperations.SetCacheItem(key, value, options);
+            if (value == null)
+            {
+                throw new ArgumentNullException(nameof(value), $"{nameof(value)} cannot be null.");
+            }
+
+            if (options == null)
+            {
+                throw new ArgumentNullException(nameof(options), $"{nameof(options)} cannot be null.");
+            }
+
+            _databaseOperations.SetCacheItem(key, value, options);
         }
 
+        /// <inheritdoc />
         public async Task SetAsync(string key, byte[] value, DistributedCacheEntryOptions options,
             CancellationToken token = new CancellationToken())
         {
             ValidateKey(key);
+
+            if (options == null)
+            {
+                throw new ArgumentNullException(nameof(options), $"{nameof(options)} cannot be null.");
+            }
 
             await _databaseOperations.SetCacheItemAsync(key, value, options, token);
         }
@@ -102,8 +115,6 @@ namespace ScaledDomains.Extensions.Caching.MySql
             {
                 throw new ArgumentNullException(nameof(key), $"{nameof(key)} cannot be null or empty.");
             }
-
-            var s = Encoding.ASCII.GetString(Encoding.Default.GetBytes(key));
 
             if (key.Length > DatabaseOperations.IdColumnSize)
             {
