@@ -2,8 +2,10 @@ mode: ContinuousDeployment
 continuous-delivery-fallback-tag: ''
 branches:
   master:
+    mode: ContinuousDeployment
     is-release-branch: true
   feature:
+    mode: ContinuousDeployment
     tag: useBranchName
   pull-request: {}
 ignore:
