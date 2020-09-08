@@ -18,12 +18,6 @@ namespace ScaledDomains.Extensions.Caching.MySql
         public string TableName { get; set; }
 
         /// <summary>
-        /// The default sliding expiration set for a cache entry if neither Absolute or SlidingExpiration has been set explicitly.
-        /// By default, it's 20 minutes.
-        /// </summary>
-        public TimeSpan DefaultSlidingExpiration { get; set; } = TimeSpan.FromMinutes(20);
-
-        /// <summary>
         /// The minimum length of time between successive scans for expired items.
         /// By default, it's 20 minutes.
         /// </summary>

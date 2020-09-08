@@ -1,4 +1,6 @@
 using System;
+using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Distributed;
@@ -14,20 +16,18 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tests
     {
         private readonly IDistributedCache _mySqlServerCache;
 
-        private readonly Mock<ISystemClock> _clock;
-
         private readonly DateTimeOffset _expired;
         private readonly DateTimeOffset _notExpired;
 
         public MySqlServerCacheOperationTests()
         {
-            _clock = new Mock<ISystemClock>();
-            _clock.Setup(p => p.UtcNow).Returns(_utcNow);
+            var clock = new Mock<ISystemClock>();
+            clock.Setup(p => p.UtcNow).Returns(_utcNow);
 
+            _mySqlServerCache = CreateMySqlServerCache(clock.Object);
+            
             _expired = _utcNow.AddMinutes(-5);
             _notExpired = _utcNow.AddMinutes(5);
-
-            _mySqlServerCache = CreateMySqlServerCache(_clock.Object);
         }
 
         [TestInitialize]
@@ -298,16 +298,15 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tests
             await _mySqlServerCache.RemoveAsync(id);
         }
 
-        [Ignore]
         [TestMethod]
-        public void Set_ShouldReturnsStoreItemIntoDatabase()
+        public void Set_ShouldStoreCacheItemIntoDatabase()
         {
             // Arrange
 
             var testItem = new CacheItem
             {
                 Id = "myKey",
-                ExpiresAt = _expired.UtcDateTime,
+                ExpiresAt = DateTime.MinValue,
                 Value = Guid.NewGuid().ToByteArray()
             };
 
@@ -316,7 +315,7 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tests
             _mySqlServerCache.Set(
                 testItem.Id,
                 testItem.Value,
-                new DistributedCacheEntryOptions {SlidingExpiration = TimeSpan.FromHours(1)});
+                new DistributedCacheEntryOptions { AbsoluteExpiration = _notExpired });
 
             // Assert
 
@@ -324,7 +323,227 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tests
 
             Assert.IsNotNull(actualItem);
             CollectionAssert.AreEquivalent(testItem.Value, actualItem.Value);
-            Assert.AreEqual(testItem.ExpiresAt, actualItem.ExpiresAt);
+        }
+
+        [TestMethod]
+        public async Task SetAsync_ShouldStoreCacheItemIntoDatabase()
+        {
+            // Arrange
+
+            var testItem = new CacheItem
+            {
+                Id = "myKey",
+                ExpiresAt = DateTime.MinValue,
+                Value = Guid.NewGuid().ToByteArray()
+            };
+
+            // Act
+
+            await _mySqlServerCache.SetAsync(
+                testItem.Id,
+                testItem.Value,
+                new DistributedCacheEntryOptions { AbsoluteExpiration = _notExpired });
+
+            // Assert
+
+            var actualItem = base.GetCacheItem(testItem.Id);
+
+            Assert.IsNotNull(actualItem);
+            CollectionAssert.AreEquivalent(testItem.Value, actualItem.Value);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void Set_WithNullData_ShouldThrowArgumentNullException()
+        {
+            _mySqlServerCache.Set(
+                "myKey",
+                null,
+                new DistributedCacheEntryOptions { AbsoluteExpiration = _notExpired });
+        }
+
+        [TestMethod]
+        public void Set_WithAbsoluteExpiration_ShouldSetExpiresAtAndSlidingExpirationShouldBeNull()
+        {
+            // Arrange
+
+            var testItem = new CacheItem
+            {
+                Id = "myKey",
+                ExpiresAt = DateTime.MinValue,
+                Value = Guid.NewGuid().ToByteArray()
+            };
+
+            var absoluteExpiration = _utcNow.AddHours(1);
+
+            // Act
+
+            _mySqlServerCache.Set(
+                testItem.Id,
+                testItem.Value,
+                new DistributedCacheEntryOptions { AbsoluteExpiration = absoluteExpiration });
+
+            // Assert
+
+            var actualItem = base.GetCacheItem(testItem.Id);
+
+            Assert.AreEqual(absoluteExpiration.UtcDateTime, actualItem.ExpiresAt);
+            Assert.AreEqual(absoluteExpiration.UtcDateTime, actualItem.AbsoluteExpiration);
+            Assert.IsNull(actualItem.SlidingExpiration);
+        }
+
+        [TestMethod]
+        public void Set_WithAbsoluteExpirationRelativeToNow_ShouldSetExpiresAtAndSlidingExpirationShouldBeNull()
+        {
+            // Arrange
+
+            var testItem = new CacheItem
+            {
+                Id = "myKey",
+                ExpiresAt = DateTime.MinValue,
+                Value = Guid.NewGuid().ToByteArray()
+            };
+
+            var absoluteExpiration = TimeSpan.FromHours(1);
+
+            // Act
+
+            _mySqlServerCache.Set(
+                testItem.Id,
+                testItem.Value,
+                new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = absoluteExpiration });
+
+            // Assert
+
+            var actualItem = base.GetCacheItem(testItem.Id);
+
+            Assert.AreEqual(_utcNow.Add(absoluteExpiration).UtcDateTime, actualItem.ExpiresAt);
+            Assert.AreEqual(_utcNow.Add(absoluteExpiration).UtcDateTime, actualItem.AbsoluteExpiration);
+            Assert.IsNull(actualItem.SlidingExpiration);
+        }
+
+        [TestMethod]
+        public void Set_WithSlidingExpiration_ShouldSetExpiresAtAndAbsoluteExpirationShouldBeNull()
+        {
+            // Arrange
+
+            var testItem = new CacheItem
+            {
+                Id = "myKey",
+                ExpiresAt = DateTime.MinValue,
+                Value = Guid.NewGuid().ToByteArray()
+            };
+
+            var slidingExpiration = TimeSpan.FromMilliseconds(1234.567);
+
+            // Act
+
+            _mySqlServerCache.Set(
+                testItem.Id,
+                testItem.Value,
+                new DistributedCacheEntryOptions { SlidingExpiration = slidingExpiration });
+
+            // Assert
+
+            var actualItem = base.GetCacheItem(testItem.Id);
+
+            Assert.AreEqual(_utcNow.Add(slidingExpiration).UtcDateTime, actualItem.ExpiresAt);
+            Assert.AreEqual(slidingExpiration, actualItem.SlidingExpiration);
+            Assert.IsNull(actualItem.AbsoluteExpiration);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public void Set_WithInvalidCacheEntryOption_ShouldThrowInvalidOperationException()
+        {
+            _mySqlServerCache.Set(
+                "myKey",
+                new byte[] { 1, 2, 3 },
+                new DistributedCacheEntryOptions { SlidingExpiration = null, AbsoluteExpiration = null });
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void Set_WithInvalidNullCacheEntryOption_ShouldThrowArgumentNullException()
+        {
+            _mySqlServerCache.Set(
+                "myKey",
+                new byte[] { 1, 2, 3 },
+                null);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public async Task SetAsync_WithInvalidNullCacheEntryOption_ShouldThrowArgumentNullException()
+        {
+            await _mySqlServerCache.SetAsync(
+                "myKey",
+                new byte[] { 1, 2, 3 },
+                null);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public void Set_WithInvalidAbsoluteExpirationValue_ShouldThrowInvalidOperationException()
+        {
+            _mySqlServerCache.Set(
+                "myKey",
+                new byte[] { 1, 2, 3 },
+                new DistributedCacheEntryOptions { SlidingExpiration = null, AbsoluteExpiration = _utcNow.AddMilliseconds(-1) });
+        }
+
+        [DataTestMethod]
+        [DataRow(null)]
+        [DataRow("")]
+        [DataRow("\t \n")]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void Set_WithNullOrEmptyWhiteSpaceKey_ShouldThrowArgumentNullException(string key)
+        {
+            _mySqlServerCache.Set(
+                key,
+                new byte[] { 1, 2, 3 },
+                new DistributedCacheEntryOptions { AbsoluteExpiration = _utcNow.AddMilliseconds(1) });
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentOutOfRangeException))]
+        public void Set_WithTooLongKey_ShouldThrowArgumentOutOfRangeException()
+        {
+            _mySqlServerCache.Set(
+                string.Join("", Enumerable.Repeat("K", 767 + 1)),
+                new byte[] { 1, 2, 3 },
+                new DistributedCacheEntryOptions { AbsoluteExpiration = _utcNow.AddMilliseconds(1) });
+        }
+
+        [TestMethod]
+
+        public void SetAsync_MultipleSetWithSameKey_ShouldStoreOnlyOneItem()
+        {
+            const byte count = 128;
+            const string keyName = "myKey";
+            var signal = new ManualResetEventSlim();
+
+            var tasks = new Task[count];
+
+            for (var i = 0; i < count; i++)
+            {
+                var _1 = i;
+                tasks[i] = Task.Run(() =>
+                {
+                    signal.Wait();
+
+                    return _mySqlServerCache.SetAsync(
+                        keyName,
+                        new byte[] { 1, 2, 3 },
+                        new DistributedCacheEntryOptions { AbsoluteExpiration = _notExpired });
+                });
+            }
+
+            signal.Set();
+
+            Task.WaitAll(tasks);
+
+            Assert.IsNotNull(base.GetCacheItem(keyName));
         }
     }
 }

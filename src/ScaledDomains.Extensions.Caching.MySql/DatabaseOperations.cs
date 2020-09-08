@@ -104,9 +104,8 @@ namespace ScaledDomains.Extensions.Caching.MySql
             {
                 command.ExecuteNonQuery();
             }
-            catch (MySqlException ex) when (!IsDuplicateKeyException(ex))
+            catch (MySqlException ex) when (IsDuplicateKeyException(ex))
             {
-
             }
         }
 
@@ -136,9 +135,9 @@ namespace ScaledDomains.Extensions.Caching.MySql
             {
                 await command.ExecuteNonQueryAsync(token).ConfigureAwait(false);
             }
-            catch (MySqlException ex) when (!IsDuplicateKeyException(ex))
+            catch (MySqlException ex) when (IsDuplicateKeyException(ex))
             {
-
+                
             }
         }
 
@@ -160,6 +159,8 @@ namespace ScaledDomains.Extensions.Caching.MySql
 
         public async Task RefreshCacheItemAsync(string key, CancellationToken token = default)
         {
+            token.ThrowIfCancellationRequested();
+
             var cmdText = _sqlCommands.RefreshCacheItem;
             var utcNow = _systemClock.UtcNow;
 
@@ -190,6 +191,8 @@ namespace ScaledDomains.Extensions.Caching.MySql
 
         public async Task DeleteCacheItemAsync(string key, CancellationToken token = default)
         {
+            token.ThrowIfCancellationRequested();
+
             var cmdText = _sqlCommands.DeleteCacheItem;
 
             using var connection = new MySqlConnection(_options.ConnectionString);
@@ -204,6 +207,8 @@ namespace ScaledDomains.Extensions.Caching.MySql
 
         public async Task DeleteExpiredCacheItemsAsync(CancellationToken token = default)
         {
+            token.ThrowIfCancellationRequested();
+
             var utcNow = _systemClock.UtcNow;
 
             var cmdText = _sqlCommands.DeleteExpiredCacheItems;
