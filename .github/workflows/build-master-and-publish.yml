@@ -6,9 +6,7 @@ on:
     
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v2
     - name: Fetch all history for all tags and branches
@@ -17,10 +15,6 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 3.1.301
-    - name: Install GitVersion
-      uses: gittools/actions/gitversion/setup@v0.9.3
-      with:
-          versionSpec: '5.2.x'
     - name: Install dependencies
       run: dotnet restore --no-cache
     - name: Install tools
@@ -40,27 +34,38 @@ jobs:
         EOF"
     - name: Test
       run: dotnet test --no-restore --no-build --configuration Release /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:ExcludeByAttribute="Obsolete%2cGeneratedCodeAttribute%2cCompilerGeneratedAttribute"
-    - name: Use GitVersion
-      id: gitversion
-      uses: gittools/actions/gitversion/execute@v0.9.3
     - name: Codecov
       uses: codecov/codecov-action@v1.0.13
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
+    - name: Draft Release
+      uses: release-drafter/release-drafter@v5
+      id: releasedrafter
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - run: |
-        echo "Major: ${{ steps.gitversion.outputs.major }}"
-        echo "Minor: ${{ steps.gitversion.outputs.minor }}"
-        echo "Patch: ${{ steps.gitversion.outputs.patch }}"
-        echo "NuGetVersionV2: ${{ steps.gitversion.outputs.nuGetVersionV2 }}"
-        echo "NuGetVersion: ${{ steps.gitversion.outputs.nuGetVersion }}"
-        echo "NuGetPreReleaseTagV2: ${{ steps.gitversion.outputs.nuGetPreReleaseTagV2 }}"
-        echo "NuGetPreReleaseTag: ${{ steps.gitversion.outputs.nuGetPreReleaseTag }}"
-        echo "CommitsSinceVersionSource: ${{ steps.gitversion.outputs.CommitsSinceVersionSourcePadded }}"
-        echo "BranchName: ${{ steps.gitversion.outputs.branchName }}"
-    - name: Pack
-      run: dotnet pack src/ScaledDomains.Extensions.Caching.MySql/ScaledDomains.Extensions.Caching.MySql.csproj -p:PackageVersion=${{ steps.gitversion.outputs.nuGetVersionV2 }} --output nuget-packages --configuration Release --no-build --no-restore
-    - name: Push
-      run: |
-        dotnet nuget add source https://nuget.pkg.github.com/scaleddomains/index.json -n scaleddomains -u scaleddomains -p ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --configfile ./NuGet.Config && \
-        dotnet nuget push nuget-packages/*.nupkg --api-key ${{ secrets.GITHUB_TOKEN }} --source scaleddomains --no-symbols true --skip-duplicate true && \
-        dotnet nuget remove source scaleddomains
+        echo "Id  : ${{ steps.releasedrafter.outputs.id }}"
+        echo "Name: ${{ steps.releasedrafter.outputs.name }}"
+        echo "Tag : ${{ steps.releasedrafter.outputs.tag_name }}"
+    # steps:
+    # - name: Pack
+    #   run: dotnet pack src/ScaledDomains.Extensions.Caching.MySql/ScaledDomains.Extensions.Caching.MySql.csproj -p:PackageVersion=${{ steps.gitversion.outputs.nuGetVersionV2 }} --output nuget-packages --configuration Release --no-build --no-restore
+    # - name: Push
+    #   run: |
+    #     dotnet nuget add source https://nuget.pkg.github.com/scaleddomains/index.json -n scaleddomains -u scaleddomains -p ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --configfile ./NuGet.Config && \
+    #     dotnet nuget push nuget-packages/*.nupkg --api-key ${{ secrets.GITHUB_TOKEN }} --source scaleddomains --no-symbols true --skip-duplicate true && \
+    #     dotnet nuget remove source scaleddomains
+    # - name: Create Release
+    #   id: create_release
+    #   uses: actions/create-release@v1
+    #   env:
+    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+    #   with:
+    #     tag_name: ${{ format('v{0}', steps.gitversion.outputs.nuGetVersionV2) }}
+    #     release_name: Release ${{ format('v{0}', steps.gitversion.outputs.nuGetVersionV2) }}
+    #     body: |
+    #       Changes in this Release
+    #       - First Change
+    #       - Second Change
+    #     draft: false
+    #     prerelease: false
