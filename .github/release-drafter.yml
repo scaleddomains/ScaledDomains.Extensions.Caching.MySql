@@ -28,5 +28,9 @@ version-resolver:
   default: patch
 template: |
   ## Changes
-
+  
   $CHANGES
+  
+  Contributors: $CONTRIBUTORS
+  
+  Previous: $PREVIOUS_TAG

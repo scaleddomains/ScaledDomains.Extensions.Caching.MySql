@@ -17,10 +17,6 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 3.1.301
-    - name: Install GitVersion
-      uses: gittools/actions/gitversion/setup@v0.9.3
-      with:
-          versionSpec: '5.2.x'
     - name: Install dependencies
       run: dotnet restore --no-cache
     - name: Install tools
@@ -40,20 +36,8 @@ jobs:
         EOF"
     - name: Test
       run: dotnet test --no-restore --no-build --configuration Release /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:ExcludeByAttribute="Obsolete%2cGeneratedCodeAttribute%2cCompilerGeneratedAttribute"
-    - name: Use GitVersion
-      id: gitversion
-      uses: gittools/actions/gitversion/execute@v0.9.3
     - name: Codecov
       uses: codecov/codecov-action@v1.0.13
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
-    - run: |
-        echo "Major: ${{ steps.gitversion.outputs.major }}"
-        echo "Minor: ${{ steps.gitversion.outputs.minor }}"
-        echo "Patch: ${{ steps.gitversion.outputs.patch }}"
-        echo "NuGetVersionV2: ${{ steps.gitversion.outputs.nuGetVersionV2 }}"
-        echo "NuGetVersion: ${{ steps.gitversion.outputs.nuGetVersion }}"
-        echo "NuGetPreReleaseTagV2: ${{ steps.gitversion.outputs.nuGetPreReleaseTagV2 }}"
-        echo "NuGetPreReleaseTag: ${{ steps.gitversion.outputs.nuGetPreReleaseTag }}"
-        echo "CommitsSinceVersionSource: ${{ steps.gitversion.outputs.CommitsSinceVersionSourcePadded }}"
-        echo "BranchName: ${{ steps.gitversion.outputs.branchName }}"
+  

@@ -38,11 +38,21 @@ jobs:
       uses: codecov/codecov-action@v1.0.13
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
+    - name: 'Get Previous tag'
+      id: previoustag
+      uses: "WyriHaximus/github-action-get-previous-tag@master"
+    - name: Process version of the tag
+      id: version
+      uses: ncipollo/semantic-version-action@v1
+      with:
+        tag: ${{ steps.previoustag.outputs.tag }}
     - name: Draft Release
       uses: release-drafter/release-drafter@v5
       id: releasedrafter
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        version: ${{ format('{0}.{1}.{2}', steps.version.outputs.major, steps.version.outputs.minor, steps.version.outputs.patch) }}
     - run: |
         echo "Id  : ${{ steps.releasedrafter.outputs.id }}"
         echo "Name: ${{ steps.releasedrafter.outputs.name }}"
