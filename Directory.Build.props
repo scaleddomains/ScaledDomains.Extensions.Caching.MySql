@@ -1,7 +1,7 @@
 <Project>
   <PropertyGroup>
     <Authors>Attila Ersek;Endre Toth</Authors>
-    <PackageDescription>This package adds an Octocat!</PackageDescription>
+    <PackageDescription>ScaledDomains.Extensions.Caching.MySql is a free, open source distributed cache implementation using MySql as datastore.</PackageDescription>
     <RepositoryUrl>https://github.com/scaleddomains/ScaledDomains.Extensions.Caching.MySql</RepositoryUrl>
   </PropertyGroup>
 </Project>

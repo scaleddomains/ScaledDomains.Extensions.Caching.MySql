@@ -1,0 +1,38 @@
+name: build-master
+on:
+  push:
+    branches: [ master ]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Fetch all history for all tags and branches
+      run: if $(git rev-parse --is-shallow-repository); then git fetch --prune --unshallow ; fi
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.1.301
+    - name: Install dependencies
+      run: dotnet restore --no-cache
+    - name: Install tools
+      run: dotnet tool restore
+    - name: Build
+      run: dotnet build --configuration Release --no-restore
+    - name: Stop and remove MySQL container if exists
+      run: docker rm -f mysql || true
+    - name: Create mysql container
+      run: docker run --publish 3306:3306 --name mysql -e  MYSQL_ALLOW_EMPTY_PASSWORD="yes" -e MYSQL_DATABASE=distributedCache-db -d mysql:latest 
+    - name: Wait for MySQL to come up
+      run: docker exec mysql bash -c 'while ! mysql --protocol TCP -e "show databases;" > /dev/null 2>&1; do sleep 1; done'
+    - name: Deploy Schema
+      run: |
+        docker exec mysql bash -c "mysql --protocol TCP distributedCache-db <<- 'EOF'
+        $(cat test/docker/init.sql)
+        EOF"
+    - name: Test
+      run: dotnet test --no-restore --no-build --configuration Release /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:ExcludeByAttribute="Obsolete%2cGeneratedCodeAttribute%2cCompilerGeneratedAttribute"
+    - name: Codecov
+      uses: codecov/codecov-action@v1.0.13
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
