@@ -3,5 +3,14 @@
     <Authors>Attila Ersek;Endre Toth</Authors>
     <PackageDescription>ScaledDomains.Extensions.Caching.MySql is a free, open source distributed cache implementation using MySql as datastore.</PackageDescription>
     <RepositoryUrl>https://github.com/scaleddomains/ScaledDomains.Extensions.Caching.MySql</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/scaleddomains/ScaledDomains.Extensions.Caching.MySql</PackageProjectUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageReleaseNotes>Version 1.0.0
+      * Initial release
+     </PackageReleaseNotes>
+     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+     <Copyright>ScaledDomains © ScaledDomains 2020</Copyright>
+     <PackageTags>mysql cache distributedcache dotnet core .net</PackageTags>
+     
   </PropertyGroup>
 </Project>
