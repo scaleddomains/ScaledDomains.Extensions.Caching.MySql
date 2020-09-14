@@ -11,6 +11,5 @@
      <PackageLicenseExpression>MIT</PackageLicenseExpression>
      <Copyright>ScaledDomains © ScaledDomains 2020</Copyright>
      <PackageTags>mysql cache distributedcache dotnet core .net</PackageTags>
-     
   </PropertyGroup>
 </Project>
