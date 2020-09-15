@@ -16,7 +16,7 @@ The Distributed MySQL Server Cache implementation allows the distributed cache t
 
 #### 1.1 Requirements
 
-* `mysql-distributed-cache` - .NET Core CLI Tool (TODO -> link to README.md)
+* [`mysql-distributed-cache`](https://github.com/scaleddomains/ScaledDomains.Extensions.Caching.MySql/blob/master/tools/README.md) .NET CLI Tool
 
 The following example creates table with `myDistributedCache` name on MySQL server (`example.com`) under the `pizzaordersystem-db` schema.
 
