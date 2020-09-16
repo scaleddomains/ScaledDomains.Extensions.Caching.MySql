@@ -52,8 +52,10 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tools
                     if (string.IsNullOrWhiteSpace(connectionStringArg.Value) ||
                         string.IsNullOrWhiteSpace(tableNameArg.Value))
                     {
+                        Console.Error.WriteLine("Invalid argument(s)!");
+                        
                         createCommand.ShowHelp("create");
-                        Console.WriteLine("Invalid argument(s)!");
+                        
                         return 1;
                     }
 
