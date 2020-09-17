@@ -17,8 +17,16 @@ jobs:
       run: dotnet restore --no-cache
     - name: Install tools
       run: dotnet tool restore
-    - name: Build
-      run: dotnet build --configuration Release --no-restore
+    - name: Install sonar
+      run: dotnet tool update dotnet-sonarscanner --tool-path ./.sonar/scanner
+    - name: Build and analyze
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      run: |
+        ./.sonar/scanner/dotnet-sonarscanner begin /k:"scaleddomains_ScaledDomains.Extensions.Caching.MySql" /o:"scaleddomains" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io"
+        dotnet build --configuration Release --no-restore
+        ./.sonar/scanner/dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
     - name: Stop and remove MySQL container if exists
       run: docker rm -f mysql || true
     - name: Create mysql container
