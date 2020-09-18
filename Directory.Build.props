@@ -2,14 +2,24 @@
   <PropertyGroup>
     <Authors>Attila Ersek;Endre Toth</Authors>
     <PackageDescription>ScaledDomains.Extensions.Caching.MySql is a free, open source distributed cache implementation using MySql as datastore.</PackageDescription>
-    <RepositoryUrl>https://github.com/scaleddomains/ScaledDomains.Extensions.Caching.MySql</RepositoryUrl>
     <PackageProjectUrl>https://github.com/scaleddomains/ScaledDomains.Extensions.Caching.MySql</PackageProjectUrl>
-    <RepositoryType>git</RepositoryType>
     <PackageReleaseNotes>Version 1.0.0
       * Initial release
-     </PackageReleaseNotes>
-     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-     <Copyright>ScaledDomains © ScaledDomains 2020</Copyright>
-     <PackageTags>mysql cache distributedcache dotnet core .net</PackageTags>
+    </PackageReleaseNotes>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Copyright>ScaledDomains © ScaledDomains 2020</Copyright>
+    <PackageTags>mysql;cache;distributedcache</PackageTags>
+  </PropertyGroup>
+  <PropertyGroup>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/scaleddomains/ScaledDomains.Extensions.Caching.MySql</RepositoryUrl>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>   
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
   </PropertyGroup>
 </Project>
