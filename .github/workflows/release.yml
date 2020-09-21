@@ -1,9 +1,8 @@
-name: build-tag-and-publish
+name: release
 
 on:
-  push:
-    tags:
-      - v*
+  release:
+    types: [released, prereleased, edited]
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -15,9 +14,6 @@ jobs:
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: 3.1.301
-          source-url: https://nuget.pkg.github.com/scaleddomains/index.json
-        env:
-          NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}} 
       - name: Install dependencies
         run: dotnet restore --no-cache
       - name: Install tools
@@ -44,18 +40,11 @@ jobs:
       - name: Process version of the tag
         id: version
         uses: ncipollo/semantic-version-action@v1
-      - name: Pack
+      - name: Pack Release
+        if: "!github.event.release.prerelease"
+        run: dotnet pack src/ScaledDomains.Extensions.Caching.MySql/ScaledDomains.Extensions.Caching.MySql.csproj -p:PackageVersion=${{ format('{0}.{1}.{2}', steps.version.outputs.major, steps.version.outputs.minor, steps.version.outputs.patch) }} --output nuget-packages --configuration Release --no-build --no-restore
+      - name: Pack Prerelease
+        if: "github.event.release.prerelease"
         run: dotnet pack src/ScaledDomains.Extensions.Caching.MySql/ScaledDomains.Extensions.Caching.MySql.csproj -p:PackageVersion=${{ format('{0}.{1}.{2}-beta{3}', steps.version.outputs.major, steps.version.outputs.minor, steps.version.outputs.patch, github.run_number) }} --output nuget-packages --configuration Release --no-build --no-restore
       - name: Push
-        run: dotnet nuget push nuget-packages/*.nupkg --source https://nuget.pkg.github.com/scaleddomains/index.json --no-symbols true
-      - name: Draft Release
-        uses: release-drafter/release-drafter@v5
-        id: releasedrafter
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          version: ${{ format('{0}.{1}.{2}', steps.version.outputs.major, steps.version.outputs.minor, steps.version.outputs.patch) }}
-      - run: |
-          echo "Id  : ${{ steps.releasedrafter.outputs.id }}"
-          echo "Name: ${{ steps.releasedrafter.outputs.name }}"
-          echo "Tag : ${{ steps.releasedrafter.outputs.tag_name }}"
+        run: dotnet nuget push nuget-packages/*.*nupkg --api-key ${{ secrets.NUGET_KEY }} -s https://api.nuget.org/v3/index.json
