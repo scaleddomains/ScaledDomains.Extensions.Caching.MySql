@@ -17,16 +17,8 @@ jobs:
       run: dotnet restore --no-cache
     - name: Install tools
       run: dotnet tool restore
-    - name: Install sonar
-      run: dotnet tool update dotnet-sonarscanner --tool-path ./.sonar/scanner
-    - name: Build and analyze
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      run: |
-        ./.sonar/scanner/dotnet-sonarscanner begin /k:"scaleddomains_ScaledDomains.Extensions.Caching.MySql" /o:"scaleddomains" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io"
-        dotnet build --configuration Release --no-restore
-        ./.sonar/scanner/dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
+    - name: Build
+      run: dotnet build --configuration Release --no-restore
     - name: Stop and remove MySQL container if exists
       run: docker rm -f mysql || true
     - name: Create mysql container
@@ -39,8 +31,18 @@ jobs:
         $(cat test/docker/init.sql)
         EOF"
     - name: Test
-      run: dotnet test --no-restore --no-build --configuration Release /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:ExcludeByAttribute="Obsolete%2cGeneratedCodeAttribute%2cCompilerGeneratedAttribute"
+      run: dotnet test --no-restore --no-build --configuration Release /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:ExcludeByAttribute="Obsolete%2cGeneratedCodeAttribute%2cCompilerGeneratedAttribute" --logger "trx;LogFileName=testresult.xml"
     - name: Codecov
       uses: codecov/codecov-action@v1.0.13
       with:
-        token: ${{ secrets.CODECOV_TOKEN }}
+        token: ${{ secrets.CODECOV_TOKEN }}    
+    - name: Install sonar
+      run: dotnet tool update dotnet-sonarscanner --tool-path ./.sonar/scanner
+    - name: Analyze
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      run: |
+        ./.sonar/scanner/dotnet-sonarscanner begin /k:"scaleddomains_ScaledDomains.Extensions.Caching.MySql" /o:"scaleddomains" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.opencover.reportsPaths="**/test/**/coverage.opencover.xml" /d:sonar.cs.vstest.reportsPaths="**/test/**/testresult.xml" /d:sonar.coverage.exclusions="**/test/**/*.cs"
+        dotnet build --configuration Release --no-restore
+        ./.sonar/scanner/dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
