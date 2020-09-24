@@ -3,6 +3,7 @@ using System.Linq;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
@@ -19,6 +20,34 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tests
                 options.ConnectionString = "Server=example.com;Database=db;User=root";
                 options.TableName = "MyTable";
             });
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(OptionsValidationException))]
+        public void AddDistributedSqlServerCache_WithNullConnectionString_ShouldThrowOptionsValidationException()
+        {
+            var services = new ServiceCollection();
+
+            MySqlServerCachingServicesExtensions.AddDistributedMySqlServerCache(services, options => {
+                options.ConnectionString = null;
+                options.TableName = "MyTable";
+            });
+            
+            services.BuildServiceProvider().GetService<IDistributedCache>();
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(OptionsValidationException))]
+        public void AddDistributedSqlServerCache_WithNullTabeName_ShouldThrowOptionsValidationException()
+        {
+            var services = new ServiceCollection();
+
+            MySqlServerCachingServicesExtensions.AddDistributedMySqlServerCache(services, options => {
+                options.ConnectionString = "Server=example.com;Database=db;User=root;";
+                options.TableName = null;
+            });
+
+            services.BuildServiceProvider().GetService<IDistributedCache>();
         }
 
         [TestMethod]

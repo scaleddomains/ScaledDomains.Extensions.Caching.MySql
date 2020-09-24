@@ -1,6 +1,8 @@
 using System;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Options;
 
 namespace ScaledDomains.Extensions.Caching.MySql
 {
@@ -27,15 +29,25 @@ namespace ScaledDomains.Extensions.Caching.MySql
                 throw new ArgumentNullException(nameof(setupAction));
             }
 
-            services.AddOptions();
-
-            services.Add(ServiceDescriptor.Singleton<IDistributedCache, MySqlServerCache>());
+            services.TryAddEnumerable(ServiceDescriptor.Singleton<IValidateOptions<MySqlServerCacheOptions>, ValidateMySqlServerCacheOptions>());
+            services.Configure(setupAction);
+            services.TryAddSingleton<ISystemClock, SystemClock>();
+            services.TryAddSingleton<IDatabaseOperations, DatabaseOperations>();
+            services.AddSingleton<IDistributedCache, MySqlServerCache>();
 
             services.AddHostedService<MySqlServerCacheMaintenanceService>();
 
-            services.Configure(setupAction);
-
             return services;
+        }
+
+        /// <summary>
+        /// Adds MySQL Server distributed caching services to the specified <see cref="IServiceCollection" />.
+        /// </summary>
+        /// <param name="services">The <see cref="IServiceCollection" /> to add services to.</param>
+        /// <returns>The <see cref="IServiceCollection"/> so that additional calls can be chained.</returns>
+        public static IServiceCollection AddDistributedMySqlServerCache(this IServiceCollection services)
+        {
+            return services.AddDistributedMySqlServerCache(_ => {});
         }
     }
 }

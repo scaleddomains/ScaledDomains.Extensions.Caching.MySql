@@ -4,7 +4,7 @@ using Microsoft.Extensions.Caching.Distributed;
 
 namespace ScaledDomains.Extensions.Caching.MySql
 {
-    internal interface IDatabaseOperations
+    public interface IDatabaseOperations
     {
         byte[] GetCacheItem(string key);
 
