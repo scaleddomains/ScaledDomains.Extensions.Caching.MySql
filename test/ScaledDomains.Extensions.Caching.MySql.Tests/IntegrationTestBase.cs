@@ -1,43 +1,28 @@
 using System;
-using System.Collections.Generic;
 using System.Text;
-using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.Internal;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Moq;
 using MySql.Data.MySqlClient;
 
 namespace ScaledDomains.Extensions.Caching.MySql.Tests
 {
     public class IntegrationTestBase
     {
-        private static readonly string TableName = TestConfiguration.MySqlServerCacheOptions.TableName;
-        private static readonly string ConnectionString = TestConfiguration.MySqlServerCacheOptions.ConnectionString;
-        
-        protected readonly DateTimeOffset _utcNow = new DateTimeOffset(2020, 8, 30, 1, 10, 54, TimeSpan.Zero);
+        protected readonly Mock<IOptions<MySqlServerCacheOptions>> _optionsMock = new Mock<IOptions<MySqlServerCacheOptions>>();
+        protected readonly Mock<ILogger<MySqlServerCacheMaintenanceService>> _loggerMock = new Mock<ILogger<MySqlServerCacheMaintenanceService>>();
+        protected readonly Mock<IDatabaseOperations> _databaseOperationsMock = new Mock<IDatabaseOperations>();
 
-        internal static IDistributedCache CreateMySqlServerCache(ISystemClock clock = null, IDatabaseOperations databaseOperations = null)
-        {
-            if (clock != null)
-            {
-                var options = TestConfiguration.MySqlServerCacheOptions.Clone();
-                options.SystemClock = clock;
-                options.DatabaseOperations = databaseOperations;
-
-                return new MySqlServerCache(options);
-            }
-
-            return new MySqlServerCache(TestConfiguration.MySqlServerCacheOptions);
-        }
-
-        protected CacheItem GetCacheItem(string key)
+        protected CacheItem GetCacheItem(string connectionString, string tableName, string key)
         {
             CacheItem result = null;
 
             var cmdTextBuilder = new StringBuilder();
             cmdTextBuilder.Append("SELECT Id, AbsoluteExpiration, ExpiresAt, SlidingExpiration, Value ");
-            cmdTextBuilder.AppendFormat("FROM {0} ", TableName);
+            cmdTextBuilder.AppendFormat("FROM {0} ", tableName);
             cmdTextBuilder.Append("WHERE Id = @Id;");
 
-            using var connection = new MySqlConnection(ConnectionString);
+            using var connection = new MySqlConnection(connectionString);
             using var command = new MySqlCommand(cmdTextBuilder.ToString(), connection);
 
             command.Parameters.Add(new MySqlParameter("@Id", MySqlDbType.VarString) {Value = key});
@@ -51,9 +36,9 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tests
                 result = new CacheItem
                 {
                     Id = reader.GetString(0),
-                    AbsoluteExpiration = reader.IsDBNull(1) ? null : (DateTime?)new DateTime(reader.GetFieldValue<DateTime?>(1).Value.Ticks, DateTimeKind.Utc),
+                    AbsoluteExpiration = reader.IsDBNull(1) ? (DateTime?)null : new DateTime(reader.GetDateTime(1).Ticks, DateTimeKind.Utc),
                     ExpiresAt = new DateTime(reader.GetDateTime(2).Ticks, DateTimeKind.Utc),
-                    SlidingExpiration = reader.IsDBNull(3) ? null : (TimeSpan?) reader.GetTimeSpan(3),
+                    SlidingExpiration = reader.IsDBNull(3) ? (TimeSpan?)null : reader.GetTimeSpan(3),
                     Value = reader.GetFieldValue<byte[]>(4)
                 };
             }
@@ -61,15 +46,15 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tests
             return result;
         }
 
-        protected int CreateCacheItem(CacheItem cacheItem)
+        protected int CreateCacheItem(string connectionString, string tableName, CacheItem cacheItem)
         {
             var cmdTextBuilder = new StringBuilder();
-            cmdTextBuilder.AppendFormat("INSERT INTO {0} ", TableName);
+            cmdTextBuilder.AppendFormat("INSERT INTO {0} ", tableName);
             cmdTextBuilder.Append("(Id, AbsoluteExpiration, ExpiresAt, SlidingExpiration, Value) ");
             cmdTextBuilder.Append("VALUES");
             cmdTextBuilder.Append("(@Id, @AbsoluteExpiration, @ExpiresAt, @SlidingExpiration, @Value);");
 
-            using var connection = new MySqlConnection(ConnectionString);
+            using var connection = new MySqlConnection(connectionString);
             using var command = new MySqlCommand(cmdTextBuilder.ToString(), connection);
 
             command.Parameters.Add(new MySqlParameter("@Id", MySqlDbType.VarString, 767) { Value = cacheItem.Id });
@@ -83,11 +68,11 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tests
             return command.ExecuteNonQuery();
         }
 
-        protected void ClearCache()
+        protected void ClearCache(string connectionString, string tableName)
         {
-            var cmdText = $"TRUNCATE TABLE {TableName}";
+            var cmdText = $"TRUNCATE TABLE {tableName}";
 
-            using var connection = new MySqlConnection(ConnectionString);
+            using var connection = new MySqlConnection(connectionString);
 
             using var command = new MySqlCommand(cmdText, connection);
 
