@@ -1,6 +1,5 @@
 using System;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Distributed;
@@ -16,15 +15,19 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tests
     {
         private readonly IDistributedCache _mySqlServerCache;
 
+        private readonly DateTimeOffset _utcNow;
         private readonly DateTimeOffset _expired;
         private readonly DateTimeOffset _notExpired;
 
         public MySqlServerCacheOperationTests()
         {
+            _utcNow = new DateTimeOffset(2020, 8, 30, 1, 10, 54, TimeSpan.Zero);
             var clock = new Mock<ISystemClock>();
             clock.Setup(p => p.UtcNow).Returns(_utcNow);
-
-            _mySqlServerCache = CreateMySqlServerCache(clock.Object);
+            
+            _optionsMock.SetupGet(o => o.Value).Returns(TestConfiguration.MySqlServerCacheOptions);
+            
+            _mySqlServerCache = new MySqlServerCache(new DatabaseOperations(_optionsMock.Object, clock.Object));
             
             _expired = _utcNow.AddMinutes(-5);
             _notExpired = _utcNow.AddMinutes(5);
@@ -33,7 +36,7 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tests
         [TestInitialize]
         public void Setup()
         {
-            base.ClearCache();
+            ClearCache(TestConfiguration.MySqlServerCacheOptions.ConnectionString, TestConfiguration.MySqlServerCacheOptions.TableName);
         }
 
         [TestMethod]
@@ -48,7 +51,7 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tests
                 Value = Guid.NewGuid().ToByteArray()
             };
 
-            base.CreateCacheItem(testItem);
+            CreateCacheItem(TestConfiguration.MySqlServerCacheOptions.ConnectionString, TestConfiguration.MySqlServerCacheOptions.TableName, testItem);
 
             // Act
 
@@ -72,7 +75,7 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tests
                 Value = Guid.NewGuid().ToByteArray()
             };
 
-            base.CreateCacheItem(testItem);
+            CreateCacheItem(TestConfiguration.MySqlServerCacheOptions.ConnectionString, TestConfiguration.MySqlServerCacheOptions.TableName, testItem);
 
             // Act
 
@@ -94,10 +97,10 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tests
                 Id = "myKey",
                 ExpiresAt = _notExpired.UtcDateTime,
                 Value = Guid.NewGuid().ToByteArray(),
-                SlidingExpiration = TimeSpan.FromMinutes(5)
+                SlidingExpiration = TimeSpan.FromMinutes(1)
             };
 
-            base.CreateCacheItem(testItem);
+            CreateCacheItem(TestConfiguration.MySqlServerCacheOptions.ConnectionString, TestConfiguration.MySqlServerCacheOptions.TableName, testItem);
 
             // Act
 
@@ -105,7 +108,10 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tests
 
             // Assert
 
-            var actual = base.GetCacheItem(testItem.Id);
+            var actual = GetCacheItem(TestConfiguration.MySqlServerCacheOptions.ConnectionString, TestConfiguration.MySqlServerCacheOptions.TableName, testItem.Id);
+            
+            Assert.AreEqual(_utcNow.Add(testItem.SlidingExpiration.Value).Ticks, actual.ExpiresAt.Ticks);
+            Assert.IsNotNull(actual);
             Assert.AreEqual(_utcNow.Add(testItem.SlidingExpiration.Value), actual.ExpiresAt);
         }
 
@@ -121,7 +127,7 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tests
                 Value = Guid.NewGuid().ToByteArray()
             };
 
-            base.CreateCacheItem(testItem);
+            CreateCacheItem(TestConfiguration.MySqlServerCacheOptions.ConnectionString, TestConfiguration.MySqlServerCacheOptions.TableName, testItem);
 
             // Act
 
@@ -157,7 +163,7 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tests
                 SlidingExpiration = TimeSpan.FromHours(1)
             };
 
-            base.CreateCacheItem(testItem);
+            CreateCacheItem(TestConfiguration.MySqlServerCacheOptions.ConnectionString, TestConfiguration.MySqlServerCacheOptions.TableName, testItem);
 
             // Act
 
@@ -165,8 +171,9 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tests
 
             // Assert
 
-            var actualItem = GetCacheItem(testItem.Id);
+            var actualItem = GetCacheItem(TestConfiguration.MySqlServerCacheOptions.ConnectionString, TestConfiguration.MySqlServerCacheOptions.TableName, testItem.Id);
 
+            Assert.IsNotNull(actualItem);
             Assert.AreEqual(_utcNow.Add(testItem.SlidingExpiration.Value).UtcDateTime, actualItem.ExpiresAt);
         }
 
@@ -183,7 +190,7 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tests
                 SlidingExpiration = TimeSpan.FromHours(1)
             };
 
-            base.CreateCacheItem(testItem);
+            CreateCacheItem(TestConfiguration.MySqlServerCacheOptions.ConnectionString, TestConfiguration.MySqlServerCacheOptions.TableName, testItem);
 
             // Act
 
@@ -191,8 +198,9 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tests
 
             // Assert
 
-            var actualItem = GetCacheItem(testItem.Id);
+            var actualItem = GetCacheItem(TestConfiguration.MySqlServerCacheOptions.ConnectionString, TestConfiguration.MySqlServerCacheOptions.TableName, testItem.Id);
 
+            Assert.IsNotNull(actualItem);
             Assert.AreEqual(testItem.ExpiresAt, actualItem.ExpiresAt);
         }
 
@@ -209,7 +217,7 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tests
                 SlidingExpiration = TimeSpan.FromHours(1)
             };
 
-            CreateCacheItem(testItem);
+            CreateCacheItem(TestConfiguration.MySqlServerCacheOptions.ConnectionString, TestConfiguration.MySqlServerCacheOptions.TableName, testItem);
 
             // Act
 
@@ -217,8 +225,9 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tests
 
             // Assert
 
-            var actualItem = GetCacheItem(testItem.Id);
+            var actualItem = GetCacheItem(TestConfiguration.MySqlServerCacheOptions.ConnectionString, TestConfiguration.MySqlServerCacheOptions.TableName, testItem.Id);
 
+            Assert.IsNotNull(actualItem);
             Assert.AreEqual(_utcNow.Add(testItem.SlidingExpiration.Value).UtcDateTime, actualItem.ExpiresAt);
         }
 
@@ -235,7 +244,7 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tests
                 SlidingExpiration = TimeSpan.FromHours(1)
             };
 
-            CreateCacheItem(testItem);
+            CreateCacheItem(TestConfiguration.MySqlServerCacheOptions.ConnectionString, TestConfiguration.MySqlServerCacheOptions.TableName, testItem);
 
             // Act
 
@@ -243,7 +252,7 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tests
 
             // Assert
 
-            var actualItem = GetCacheItem(testItem.Id);
+            var actualItem = GetCacheItem(TestConfiguration.MySqlServerCacheOptions.ConnectionString, TestConfiguration.MySqlServerCacheOptions.TableName, testItem.Id);
 
             Assert.IsNull(actualItem);
         }
@@ -261,7 +270,7 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tests
                 SlidingExpiration = TimeSpan.FromHours(1)
             };
 
-            CreateCacheItem(testItem);
+            CreateCacheItem(TestConfiguration.MySqlServerCacheOptions.ConnectionString, TestConfiguration.MySqlServerCacheOptions.TableName, testItem);
 
             // Act
 
@@ -269,7 +278,7 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tests
 
             // Assert
 
-            var actualItem = GetCacheItem(testItem.Id);
+            var actualItem = GetCacheItem(TestConfiguration.MySqlServerCacheOptions.ConnectionString, TestConfiguration.MySqlServerCacheOptions.TableName, testItem.Id);
 
             Assert.IsNull(actualItem);
         }
@@ -319,7 +328,7 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tests
 
             // Assert
 
-            var actualItem = base.GetCacheItem(testItem.Id);
+            var actualItem = GetCacheItem(TestConfiguration.MySqlServerCacheOptions.ConnectionString, TestConfiguration.MySqlServerCacheOptions.TableName, testItem.Id);
 
             Assert.IsNotNull(actualItem);
             CollectionAssert.AreEquivalent(testItem.Value, actualItem.Value);
@@ -346,7 +355,7 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tests
 
             // Assert
 
-            var actualItem = base.GetCacheItem(testItem.Id);
+            var actualItem = GetCacheItem(TestConfiguration.MySqlServerCacheOptions.ConnectionString, TestConfiguration.MySqlServerCacheOptions.TableName, testItem.Id);
 
             Assert.IsNotNull(actualItem);
             CollectionAssert.AreEquivalent(testItem.Value, actualItem.Value);
@@ -385,8 +394,9 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tests
 
             // Assert
 
-            var actualItem = base.GetCacheItem(testItem.Id);
-
+            var actualItem = GetCacheItem(TestConfiguration.MySqlServerCacheOptions.ConnectionString, TestConfiguration.MySqlServerCacheOptions.TableName, testItem.Id);
+            
+            Assert.IsNotNull(actualItem);
             Assert.AreEqual(absoluteExpiration.UtcDateTime, actualItem.ExpiresAt);
             Assert.AreEqual(absoluteExpiration.UtcDateTime, actualItem.AbsoluteExpiration);
             Assert.IsNull(actualItem.SlidingExpiration);
@@ -415,8 +425,9 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tests
 
             // Assert
 
-            var actualItem = base.GetCacheItem(testItem.Id);
+            var actualItem = GetCacheItem(TestConfiguration.MySqlServerCacheOptions.ConnectionString, TestConfiguration.MySqlServerCacheOptions.TableName, testItem.Id);
 
+            Assert.IsNotNull(actualItem);
             Assert.AreEqual(_utcNow.Add(absoluteExpiration).UtcDateTime, actualItem.ExpiresAt);
             Assert.AreEqual(_utcNow.Add(absoluteExpiration).UtcDateTime, actualItem.AbsoluteExpiration);
             Assert.IsNull(actualItem.SlidingExpiration);
@@ -445,8 +456,9 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tests
 
             // Assert
 
-            var actualItem = base.GetCacheItem(testItem.Id);
+            var actualItem = GetCacheItem(TestConfiguration.MySqlServerCacheOptions.ConnectionString, TestConfiguration.MySqlServerCacheOptions.TableName, testItem.Id);
 
+            Assert.IsNotNull(actualItem);
             Assert.AreEqual(_utcNow.Add(slidingExpiration).UtcDateTime, actualItem.ExpiresAt);
             Assert.AreEqual(slidingExpiration, actualItem.SlidingExpiration);
             Assert.IsNull(actualItem.AbsoluteExpiration);
@@ -543,7 +555,7 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tests
 
             Task.WaitAll(tasks);
 
-            Assert.IsNotNull(base.GetCacheItem(keyName));
+            Assert.IsNotNull(GetCacheItem(TestConfiguration.MySqlServerCacheOptions.ConnectionString, TestConfiguration.MySqlServerCacheOptions.TableName, keyName));
         }
     }
 }

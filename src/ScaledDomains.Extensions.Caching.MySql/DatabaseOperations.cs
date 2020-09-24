@@ -15,15 +15,21 @@ namespace ScaledDomains.Extensions.Caching.MySql
 
         private readonly SqlCommands _sqlCommands;
         private readonly ISystemClock _systemClock;
-        private readonly MySqlServerCacheOptions _options;
+        private readonly string _connectionString;
 
-        public DatabaseOperations(MySqlServerCacheOptions options)
+        public DatabaseOperations(IOptions<MySqlServerCacheOptions> options, ISystemClock systemClock)
         {
-            _options = options;
-            var connectionStringBuilder = new MySqlConnectionStringBuilder(_options.ConnectionString);
+            if (options is null || options.Value is null) 
+            {
+                throw new ArgumentNullException(nameof(options));
+            }
 
-            _sqlCommands = new SqlCommands(connectionStringBuilder.Database, _options.TableName);
-            _systemClock = _options.SystemClock;
+            _systemClock = systemClock ?? throw new ArgumentNullException(nameof(systemClock));
+
+            _connectionString = options.Value.ConnectionString;
+            var connectionStringBuilder = new MySqlConnectionStringBuilder(_connectionString);
+
+            _sqlCommands = new SqlCommands(connectionStringBuilder.Database, options.Value.TableName);
         }
 
         public byte[] GetCacheItem(string key)
@@ -32,7 +38,7 @@ namespace ScaledDomains.Extensions.Caching.MySql
 
             var cmdText = _sqlCommands.GetCacheItem;
 
-            using var connection = new MySqlConnection(_options.ConnectionString);
+            using var connection = new MySqlConnection(_connectionString);
             using var command = new MySqlCommand(cmdText, connection);
 
             command.Parameters.Add(new MySqlParameter("@Id", MySqlDbType.VarString, IdColumnSize) { Value = key });
@@ -60,7 +66,7 @@ namespace ScaledDomains.Extensions.Caching.MySql
 
             var cmdText = _sqlCommands.GetCacheItem;
 
-            using var connection = new MySqlConnection(_options.ConnectionString);
+            using var connection = new MySqlConnection(_connectionString);
             using var command = new MySqlCommand(cmdText, connection);
 
             command.Parameters.Add(new MySqlParameter("@Id", MySqlDbType.VarString, IdColumnSize) { Value = key });
@@ -89,7 +95,7 @@ namespace ScaledDomains.Extensions.Caching.MySql
 
             var cmdText = _sqlCommands.SetCacheItem;
 
-            using var connection = new MySqlConnection(_options.ConnectionString);
+            using var connection = new MySqlConnection(_connectionString);
             using var command = new MySqlCommand(cmdText, connection);
             
             command.Parameters.Add(new MySqlParameter("@Id", MySqlDbType.VarString, IdColumnSize) { Value = key });
@@ -120,7 +126,7 @@ namespace ScaledDomains.Extensions.Caching.MySql
 
             var cmdText = _sqlCommands.SetCacheItem;
 
-            using var connection = new MySqlConnection(_options.ConnectionString);
+            using var connection = new MySqlConnection(_connectionString);
             using var command = new MySqlCommand(cmdText, connection);
 
             command.Parameters.Add(new MySqlParameter("@Id", MySqlDbType.VarString, IdColumnSize) { Value = key });
@@ -146,7 +152,7 @@ namespace ScaledDomains.Extensions.Caching.MySql
             var cmdText = _sqlCommands.RefreshCacheItem;
             var utcNow = _systemClock.UtcNow;
 
-            using var connection = new MySqlConnection(_options.ConnectionString);
+            using var connection = new MySqlConnection(_connectionString);
             using var command = new MySqlCommand(cmdText, connection);
 
             command.Parameters.Add(new MySqlParameter("@Id", MySqlDbType.VarString, IdColumnSize) { Value = key });
@@ -164,7 +170,7 @@ namespace ScaledDomains.Extensions.Caching.MySql
             var cmdText = _sqlCommands.RefreshCacheItem;
             var utcNow = _systemClock.UtcNow;
 
-            using var connection = new MySqlConnection(_options.ConnectionString);
+            using var connection = new MySqlConnection(_connectionString);
             using var command = new MySqlCommand(cmdText, connection);
 
             command.Parameters.Add(new MySqlParameter("@Id", MySqlDbType.VarString, IdColumnSize) { Value = key });
@@ -179,7 +185,7 @@ namespace ScaledDomains.Extensions.Caching.MySql
         {
             var cmdText = _sqlCommands.DeleteCacheItem;
 
-            using var connection = new MySqlConnection(_options.ConnectionString);
+            using var connection = new MySqlConnection(_connectionString);
             using var command = new MySqlCommand(cmdText, connection);
 
             command.Parameters.Add(new MySqlParameter("@Id", MySqlDbType.VarString, IdColumnSize) { Value = key });
@@ -195,7 +201,7 @@ namespace ScaledDomains.Extensions.Caching.MySql
 
             var cmdText = _sqlCommands.DeleteCacheItem;
 
-            using var connection = new MySqlConnection(_options.ConnectionString);
+            using var connection = new MySqlConnection(_connectionString);
             using var command = new MySqlCommand(cmdText, connection);
 
             command.Parameters.Add(new MySqlParameter("@Id", MySqlDbType.VarString, IdColumnSize) { Value = key });
@@ -213,7 +219,7 @@ namespace ScaledDomains.Extensions.Caching.MySql
 
             var cmdText = _sqlCommands.DeleteExpiredCacheItems;
 
-            using var connection = new MySqlConnection(_options.ConnectionString);
+            using var connection = new MySqlConnection(_connectionString);
             using var command = new MySqlCommand(cmdText, connection);
 
             command.Parameters.Add(new MySqlParameter("@UtcNow", MySqlDbType.Timestamp) { Value = utcNow.UtcDateTime });
