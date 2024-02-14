@@ -16,7 +16,7 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tests
         public void AddDistributedSqlServerCache_WithNullServicesCollection_ShouldThrowArgumentNullException()
         {
             MySqlServerCachingServicesExtensions.AddDistributedMySqlServerCache(null, options => {
-                options.ConnectionString = "Server=example.com;Database=db;User=root;";
+                options.ConnectionString = "Server=example.com;Database=db;User=root;SslMode=None;";
                 options.TableName = "MyTable";
             });
         }
@@ -38,7 +38,7 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tests
             // Act
 
             services.AddDistributedMySqlServerCache(options => {
-                options.ConnectionString = "Server=example.com;Database=db;User=root;";
+                options.ConnectionString = "Server=example.com;Database=db;User=root;SslMode=None";
                 options.TableName = "MyTable";
             });
 
@@ -68,7 +68,7 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tests
             // Act
 
             services.AddDistributedMySqlServerCache(options => {
-                options.ConnectionString = "Server=example.com;Database=db;User=root;";
+                options.ConnectionString = "Server=example.com;Database=db;User=root;SslMode=None;";
                 options.TableName = "MyTable";
             });
 
