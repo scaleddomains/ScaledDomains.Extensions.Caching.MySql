@@ -47,7 +47,7 @@ jobs:
       - name: Pack
         run: dotnet pack src/ScaledDomains.Extensions.Caching.MySql/ScaledDomains.Extensions.Caching.MySql.csproj -p:PackageVersion=${{ format('{0}.{1}.{2}-beta{3}', steps.version.outputs.major, steps.version.outputs.minor, steps.version.outputs.patch, github.run_number) }} --output nuget-packages --configuration Release --no-build --no-restore
       - name: Push
-        run: dotnet nuget push nuget-packages/*.nupkg --source https://nuget.pkg.github.com/scaleddomains/index.json --no-symbols true
+        run: dotnet nuget push nuget-packages/*.nupkg --api-key ${{ secrets.GITHUB_TOKEN }} --source https://nuget.pkg.github.com/scaleddomains/index.json --no-symbols true
       - name: Draft Release
         uses: release-drafter/release-drafter@v5
         id: releasedrafter
