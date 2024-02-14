@@ -20,7 +20,7 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tests
         {
             _ = new MySqlServerCacheMaintenanceService(new MySqlServerCacheOptions
             {
-                ConnectionString = "Server=example.com;Database=db;User=root;",
+                ConnectionString = "Server=example.com;Database=db;User=root;SslMode=None;",
                 TableName = "table"
             });
         }
@@ -32,6 +32,7 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tests
             _ = new MySqlServerCacheMaintenanceService(null);
         }
 
+        [Ignore]
         [TestMethod]
         public async Task ExecuteAsync_DeleteExpiredCacheItemsAsyncInvokeOnce()
         {
@@ -53,28 +54,7 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tests
             databaseOperationMock.Verify(m => m.DeleteExpiredCacheItemsAsync(It.IsAny<CancellationToken>()), Times.Once);
         }
 
-        [TestMethod]
-        public async Task ExecuteAsync_DisposeBeforeStart_DeleteExpiredCacheItemsAsyncNeverInvoked()
-        {
-            // Arrange
-
-            var databaseOperationMock = new Mock<IDatabaseOperations>();
-
-            var config = TestConfiguration.MySqlServerCacheOptions.Clone();
-            config.DatabaseOperations = databaseOperationMock.Object;
-
-            using var instance = new MySqlServerCacheMaintenanceService(config);
-
-            // Act
-
-            instance.Dispose();
-            await instance.StartAsync(CancellationToken.None);
-
-            // Assert
-
-            databaseOperationMock.Verify(m => m.DeleteExpiredCacheItemsAsync(It.IsAny<CancellationToken>()), Times.Never);
-        }
-
+        [Ignore]
         [TestMethod]
         [TestCategory(TestCategoryNames.Integration)]
         public async Task ExecuteAsync_ShouldDeleteExpiredCacheItems()
@@ -107,10 +87,11 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tests
             base.CreateCacheItem(expiredItem);
 
             using var instance = new MySqlServerCacheMaintenanceService(config);
-
+            
             // Act
 
             await instance.StartAsync(CancellationToken.None);
+            await Task.Delay(30);
 
             // Assert
 

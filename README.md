@@ -62,7 +62,7 @@ services.AddDistributedMySqlServerCache(options => {
 | Property                  | Type     | Description                                                            | Default  | Required/Optional |
 | ------------------------- | -------- | ---------------------------------------------------------------------- | -------- | ----------------- |
 | `ConnectionString`        | string   | The connection string to the database.                                 |          | REQUIRED          |
-| `TableName `              | string   | Name of the table where the cache items are stored.                    |          | REQUIRED          |
+| `TableName`               | string   | Name of the table where the cache items are stored.                    |          | REQUIRED          |
 | `ExpirationScanFrequency` | TimeSpan | The minimum length of time between successive scans for expired items. | 00:20:00 | OPTIONAL          |
 
 ### Usage

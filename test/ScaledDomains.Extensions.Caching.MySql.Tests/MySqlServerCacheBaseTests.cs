@@ -11,7 +11,7 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tests
         {
             _ = new MySqlServerCache(new MySqlServerCacheOptions
             {
-                ConnectionString = "Server=example.com;Database=db;User=root;",
+                ConnectionString = "Server=example.com;Database=db;User=root;SslMode=None;",
                 TableName = "table"
             });
         }
@@ -29,7 +29,7 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tests
         {
             _ = new MySqlServerCache(new MySqlServerCacheOptions
             {
-                ConnectionString = "Server=example.com;Database=db;User=root;",
+                ConnectionString = "Server=example.com;Database=db;User=root;SslMode=None;",
                 TableName = null
             });
         }

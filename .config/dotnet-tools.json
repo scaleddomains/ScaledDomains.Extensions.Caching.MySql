@@ -3,13 +3,13 @@
   "isRoot": true,
   "tools": {
     "gitversion.tool": {
-      "version": "5.3.7",
+      "version": "5.12.0",
       "commands": [
         "dotnet-gitversion"
       ]
     },
     "codecov.tool": {
-      "version": "1.12.3",
+      "version": "1.13.0",
       "commands": [
         "codecov"
       ]
