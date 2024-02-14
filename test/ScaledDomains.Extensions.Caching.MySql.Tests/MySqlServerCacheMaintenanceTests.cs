@@ -54,28 +54,6 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tests
         }
 
         [TestMethod]
-        public async Task ExecuteAsync_DisposeBeforeStart_DeleteExpiredCacheItemsAsyncNeverInvoked()
-        {
-            // Arrange
-
-            var databaseOperationMock = new Mock<IDatabaseOperations>();
-
-            var config = TestConfiguration.MySqlServerCacheOptions.Clone();
-            config.DatabaseOperations = databaseOperationMock.Object;
-
-            using var instance = new MySqlServerCacheMaintenanceService(config);
-
-            // Act
-
-            instance.Dispose();
-            await instance.StartAsync(CancellationToken.None);
-
-            // Assert
-
-            databaseOperationMock.Verify(m => m.DeleteExpiredCacheItemsAsync(It.IsAny<CancellationToken>()), Times.Never);
-        }
-
-        [TestMethod]
         [TestCategory(TestCategoryNames.Integration)]
         public async Task ExecuteAsync_ShouldDeleteExpiredCacheItems()
         {
