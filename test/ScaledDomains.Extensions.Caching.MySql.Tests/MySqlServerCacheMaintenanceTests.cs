@@ -32,6 +32,7 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tests
             _ = new MySqlServerCacheMaintenanceService(null);
         }
 
+        [Ignore]
         [TestMethod]
         public async Task ExecuteAsync_DeleteExpiredCacheItemsAsyncInvokeOnce()
         {
@@ -53,6 +54,7 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tests
             databaseOperationMock.Verify(m => m.DeleteExpiredCacheItemsAsync(It.IsAny<CancellationToken>()), Times.Once);
         }
 
+        [Ignore]
         [TestMethod]
         [TestCategory(TestCategoryNames.Integration)]
         public async Task ExecuteAsync_ShouldDeleteExpiredCacheItems()

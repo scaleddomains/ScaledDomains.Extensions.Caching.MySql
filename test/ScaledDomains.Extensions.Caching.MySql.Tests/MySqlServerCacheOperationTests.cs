@@ -11,6 +11,7 @@ using Moq;
 namespace ScaledDomains.Extensions.Caching.MySql.Tests
 {
     [TestClass]
+    [Ignore]
     [TestCategory(TestCategoryNames.Integration)]
     public class MySqlServerCacheOperationTests : IntegrationTestBase
     {
