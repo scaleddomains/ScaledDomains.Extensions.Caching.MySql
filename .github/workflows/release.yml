@@ -47,4 +47,4 @@ jobs:
         if: "github.event.release.prerelease"
         run: dotnet pack src/ScaledDomains.Extensions.Caching.MySql/ScaledDomains.Extensions.Caching.MySql.csproj -p:PackageVersion=${{ format('{0}.{1}.{2}-beta{3}', steps.version.outputs.major, steps.version.outputs.minor, steps.version.outputs.patch, github.run_number) }} --output nuget-packages --configuration Release --no-build --no-restore
       - name: Push
-        run: dotnet nuget push nuget-packages/*.*nupkg --api-key ${{ secrets.NUGET_KEY }} -s https://api.nuget.org/v3/index.json
+        run: dotnet nuget push nuget-packages/*.nupkg --api-key ${{ secrets.NUGET_KEY }} -s https://api.nuget.org/v3/index.json
