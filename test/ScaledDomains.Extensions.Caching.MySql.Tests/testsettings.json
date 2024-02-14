@@ -1,6 +1,6 @@
 {
   "ScaledDomains.Extensions.Caching.MySql": {
-    "ConnectionString": "Server=localhost;Database=distributedCache-db;User=root;default command timeout=60;Connection Timeout=5;SslMode=None;",
+    "ConnectionString": "Server=localhost;Database=distributedCache-db;User=root;default command timeout=60;Connection Timeout=60;SslMode=None;",
     "TableName": "distributedCache",
     "ExpirationScanFrequency":  "00:00:05" 
   } 

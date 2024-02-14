@@ -85,10 +85,11 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tests
             base.CreateCacheItem(expiredItem);
 
             using var instance = new MySqlServerCacheMaintenanceService(config);
-
+            
             // Act
 
             await instance.StartAsync(CancellationToken.None);
+            await Task.Delay(30);
 
             // Assert
 
