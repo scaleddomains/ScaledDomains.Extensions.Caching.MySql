@@ -1,6 +1,6 @@
 namespace ScaledDomains.Extensions.Caching.MySql
 {
-    internal class SqlCommands
+    internal sealed class SqlCommands
     {
         internal SqlCommands(string schemaName, string tableName)
         {

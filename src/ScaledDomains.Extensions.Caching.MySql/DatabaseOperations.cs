@@ -100,13 +100,7 @@ namespace ScaledDomains.Extensions.Caching.MySql
 
             connection.Open();
 
-            try
-            {
-                command.ExecuteNonQuery();
-            }
-            catch (MySqlException ex) when (IsDuplicateKeyException(ex))
-            {
-            }
+            command.ExecuteNonQuery();
         }
 
         public async Task SetCacheItemAsync(string key, byte[] value, DistributedCacheEntryOptions options, CancellationToken token = default)
@@ -131,14 +125,7 @@ namespace ScaledDomains.Extensions.Caching.MySql
 
             await connection.OpenAsync(token).ConfigureAwait(false);
 
-            try
-            {
-                await command.ExecuteNonQueryAsync(token).ConfigureAwait(false);
-            }
-            catch (MySqlException ex) when (IsDuplicateKeyException(ex))
-            {
-                
-            }
+            await command.ExecuteNonQueryAsync(token).ConfigureAwait(false);
         }
 
         public void RefreshCacheItem(string key)

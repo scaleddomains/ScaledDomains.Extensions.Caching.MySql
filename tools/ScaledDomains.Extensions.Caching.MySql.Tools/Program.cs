@@ -10,8 +10,8 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tools
 {
     public class Program
     {
-        internal static CancellationTokenSource CancellationTokenSource = new CancellationTokenSource();
-        internal static ManualResetEventSlim ResetEventSlim = new ManualResetEventSlim();
+        internal static readonly CancellationTokenSource CancellationTokenSource = new CancellationTokenSource();
+        internal static readonly ManualResetEventSlim ResetEventSlim = new ManualResetEventSlim();
 
         public static int Main(string[] args)
         {

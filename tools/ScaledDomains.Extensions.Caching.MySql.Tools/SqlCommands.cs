@@ -5,7 +5,7 @@ using MySql.Data.MySqlClient;
 
 namespace ScaledDomains.Extensions.Caching.MySql.Tools
 {
-    internal class SqlCommands
+    internal static class SqlCommands
     {
         internal static string CreateTable(string connectionString, string tableName)
         {

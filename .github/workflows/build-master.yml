@@ -37,6 +37,10 @@ jobs:
       uses: codecov/codecov-action@v4
       with:
         token: ${{ secrets.CODECOV_TOKEN }}    
+    - uses: actions/setup-java@v4
+      with:
+        distribution: 'adopt'
+        java-version: '21'      
     - name: Install sonar
       run: dotnet tool update dotnet-sonarscanner --tool-path ./.sonar/scanner
     - name: Analyze
