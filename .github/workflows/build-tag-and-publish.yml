@@ -7,6 +7,15 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:5.7
+        env:
+            MYSQL_ALLOW_EMPTY_PASSWORD: yes
+            MYSQL_DATABASE: distributedCache-db
+        ports:
+            - 13306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3        
     steps:
       - uses: actions/checkout@v4
       - name: Fetch all history for all tags and branches
@@ -19,22 +28,14 @@ jobs:
         env:
           NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}} 
       - name: Install dependencies
-        run: dotnet restore --no-cache
+        run: dotnet restore --no-cache --locked-mode --use-lock-file
       - name: Install tools
         run: dotnet tool restore
       - name: Build
         run: dotnet build --configuration Release --no-restore
-      - name: Stop and remove MySQL container if exists
-        run: docker rm -f mysql || true
-      - name: Create mysql container
-        run: docker run --publish 3306:3306 --name mysql -e  MYSQL_ALLOW_EMPTY_PASSWORD="yes" -e MYSQL_DATABASE=distributedCache-db -d mysql:latest
-      - name: Wait for MySQL to come up
-        run: docker exec mysql bash -c 'while ! mysql --protocol TCP -e "show databases;" > /dev/null 2>&1; do sleep 1; done'
-      - name: Deploy Schema
+      - name: Bootstrap MySQL
         run: |
-          docker exec mysql bash -c "mysql --protocol TCP distributedCache-db <<- 'EOF'
-          $(cat test/docker/init.sql)
-          EOF"
+          mysql -h 127.0.0.1 -P 13306 -uroot distributedCache-db < test/docker/init.sql  
       - name: Test
         run: dotnet test --no-restore --no-build --configuration Release /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:ExcludeByAttribute="Obsolete%2cGeneratedCodeAttribute%2cCompilerGeneratedAttribute"
       - name: Codecov
