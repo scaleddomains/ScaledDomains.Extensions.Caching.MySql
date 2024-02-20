@@ -12,14 +12,11 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tests
     [TestClass]
     public class MySqlServerCachingServicesExtensionsTests
     {
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
+        [TestMethod]        
         public void AddDistributedSqlServerCache_WithNullServicesCollection_ShouldThrowArgumentNullException()
         {
-            MySqlServerCachingServicesExtensions.AddDistributedMySqlServerCache(null, options => {
-                options.ConnectionString = "Server=example.com;Database=db;User=root";
-                options.TableName = "MyTable";
-            });
+            Assert.ThrowsException<ArgumentNullException>(() => MySqlServerCachingServicesExtensions.AddDistributedMySqlServerCache(null, Mock.Of<Action<MySqlServerCacheOptions>>()));
+            Assert.ThrowsException<ArgumentNullException>(() => MySqlServerCachingServicesExtensions.AddDistributedMySqlServerCache(null));
         }
 
         [TestMethod]
@@ -58,7 +55,30 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tests
         }
 
         [TestMethod]
-        public void AddDistributedSqlServerCache_AddsAsSingleRegistrationService()
+        public void AddDistributedSqlServerCacheWithOptions_ConfiguresWithDefaultOptions()
+        {
+            // Arrange
+
+            var serviceCollectionMock = new Mock<IServiceCollection>();
+            var services = serviceCollectionMock.Object;
+            
+            var setupAction = new Action<MySqlServerCacheOptions>(_ => {});
+
+            // Act
+
+            services.AddDistributedMySqlServerCache(setupAction);
+
+            // Assert
+            serviceCollectionMock.Verify(s => s.Add(
+                It.Is<ServiceDescriptor>(
+                    sd => sd.ServiceType == typeof(IConfigureOptions<MySqlServerCacheOptions>) && 
+                    sd.Lifetime == ServiceLifetime.Singleton && 
+                    sd.ImplementationInstance != null)), 
+                Times.Once());
+        }
+
+        [TestMethod]
+        public void AddDistributedSqlServerCache__AddsAsSingleRegistrationService()
         {
             // Arrange
 

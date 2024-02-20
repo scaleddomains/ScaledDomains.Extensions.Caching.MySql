@@ -25,18 +25,21 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
-        public void CreateAnInstance_WithNullConfiguration_ShouldThrowArgumentNullException()
-        {
-            _ = CreateMySqlServerCacheMaintenanceService(null!, _loggerMock.Object, _databaseOperationsMock.Object);
+        public void CreateAnInstance_WithNullOptions_ShouldThrowArgumentNullException()
+        {            
+            var excpetion = Assert.ThrowsException<ArgumentNullException>(() => CreateMySqlServerCacheMaintenanceService(null!, _loggerMock.Object, _databaseOperationsMock.Object));
+            Assert.IsTrue(excpetion.Message.Contains("options"));
+            _optionsMock.SetupGet(o => o.Value).Returns(() => null);
+            excpetion = Assert.ThrowsException<ArgumentNullException>(() => CreateMySqlServerCacheMaintenanceService(_optionsMock.Object, _loggerMock.Object, _databaseOperationsMock.Object));
+            Assert.IsTrue(excpetion.Message.Contains("options"));
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void CreateAnInstance_WithNullLogger_ShouldThrowArgumentNullException()
         {
-            _optionsMock.SetupGet(o => o.Value).Returns(() => new MySqlServerCacheOptions());
-            _ = CreateMySqlServerCacheMaintenanceService(_optionsMock.Object, null!, _databaseOperationsMock.Object);
+            _optionsMock.SetupGet(o => o.Value).Returns(() => new MySqlServerCacheOptions() { ExpirationScanFrequency = TimeSpan.FromSeconds(30) });
+            var excpetion = Assert.ThrowsException<ArgumentNullException>(() => CreateMySqlServerCacheMaintenanceService(_optionsMock.Object, null!, _databaseOperationsMock.Object));
+            Assert.IsTrue(excpetion.Message.Contains("logger"));
         }
 
         [TestMethod]

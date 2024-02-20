@@ -18,7 +18,7 @@ namespace ScaledDomains.Extensions.Caching.MySql
         }
 
         /// <inheritdoc />
-        public byte[] Get(string key)
+        public byte[]? Get(string key)
         {
             ValidateKey(key);
 
@@ -28,7 +28,7 @@ namespace ScaledDomains.Extensions.Caching.MySql
         }
 
         /// <inheritdoc />
-        public async Task<byte[]> GetAsync(string key, CancellationToken token = new CancellationToken())
+        public async Task<byte[]?> GetAsync(string key, CancellationToken token = new CancellationToken())
         {
             ValidateKey(key);
 

@@ -31,7 +31,7 @@ namespace ScaledDomains.Extensions.Caching.MySql
             _sqlCommands = new SqlCommands(connectionStringBuilder.Database, options.Value.TableName);
         }
 
-        public byte[] GetCacheItem(string key)
+        public byte[]? GetCacheItem(string key)
         {
             var utcNow = _systemClock.UtcNow;
 
@@ -45,7 +45,7 @@ namespace ScaledDomains.Extensions.Caching.MySql
 
             connection.Open();
 
-            byte[] result = null;
+            byte[]? result = null;
 
             using var reader = command.ExecuteReader(CommandBehavior.SingleRow | CommandBehavior.SingleResult | CommandBehavior.SequentialAccess);
 
@@ -57,7 +57,7 @@ namespace ScaledDomains.Extensions.Caching.MySql
             return result;
         }
 
-        public async Task<byte[]> GetCacheItemAsync(string key, CancellationToken token = default)
+        public async Task<byte[]?> GetCacheItemAsync(string key, CancellationToken token = default)
         {
             token.ThrowIfCancellationRequested();
 
@@ -73,7 +73,7 @@ namespace ScaledDomains.Extensions.Caching.MySql
 
             await connection.OpenAsync(token).ConfigureAwait(false);
 
-            byte[] result = null;
+            byte[]? result = null;
 
             using var reader = await command.ExecuteReaderAsync(CommandBehavior.SingleRow | CommandBehavior.SingleResult | CommandBehavior.SequentialAccess, token).ConfigureAwait(false);
 
@@ -100,8 +100,8 @@ namespace ScaledDomains.Extensions.Caching.MySql
             command.Parameters.Add(new MySqlParameter("@Id", MySqlDbType.VarString, IdColumnSize) { Value = key });
             command.Parameters.Add(new MySqlParameter("@Value", MySqlDbType.Blob) { Value = value });
             command.Parameters.Add(new MySqlParameter("@UtcNow", MySqlDbType.Timestamp) { Value = utcNow.UtcDateTime });
-            command.Parameters.Add(new MySqlParameter("@SlidingExpiration", MySqlDbType.Time) { Value = (object)options.SlidingExpiration ?? DBNull.Value });
-            command.Parameters.Add(new MySqlParameter("@AbsoluteExpiration", MySqlDbType.Timestamp) { Value = (object)absoluteExpiration?.UtcDateTime ?? DBNull.Value });
+            command.Parameters.Add(new MySqlParameter("@SlidingExpiration", MySqlDbType.Time) { Value = (object?)options.SlidingExpiration ?? DBNull.Value });
+            command.Parameters.Add(new MySqlParameter("@AbsoluteExpiration", MySqlDbType.Timestamp) { Value = (object?)absoluteExpiration?.UtcDateTime ?? DBNull.Value });
 
             connection.Open();
 
@@ -125,8 +125,8 @@ namespace ScaledDomains.Extensions.Caching.MySql
             command.Parameters.Add(new MySqlParameter("@Id", MySqlDbType.VarString, IdColumnSize) { Value = key });
             command.Parameters.Add(new MySqlParameter("@Value", MySqlDbType.Blob) { Value = value });
             command.Parameters.Add(new MySqlParameter("@UtcNow", MySqlDbType.Timestamp) { Value = utcNow.UtcDateTime });
-            command.Parameters.Add(new MySqlParameter("@SlidingExpiration", MySqlDbType.Time) { Value = (object)options.SlidingExpiration ?? DBNull.Value });
-            command.Parameters.Add(new MySqlParameter("@AbsoluteExpiration", MySqlDbType.Timestamp) { Value = (object)absoluteExpiration?.UtcDateTime ?? DBNull.Value });
+            command.Parameters.Add(new MySqlParameter("@SlidingExpiration", MySqlDbType.Time) { Value = (object?)options.SlidingExpiration ?? DBNull.Value });
+            command.Parameters.Add(new MySqlParameter("@AbsoluteExpiration", MySqlDbType.Timestamp) { Value = (object?)absoluteExpiration?.UtcDateTime ?? DBNull.Value });
 
             await connection.OpenAsync(token).ConfigureAwait(false);
 
@@ -214,8 +214,6 @@ namespace ScaledDomains.Extensions.Caching.MySql
 
             await command.ExecuteNonQueryAsync(token).ConfigureAwait(false);
         }
-
-        private static bool IsDuplicateKeyException(MySqlException ex) => ex.Number == (int)MySqlErrorCode.DuplicateKey;
 
         private static DateTimeOffset? GetAbsoluteExpiration(DateTimeOffset utcNow, DistributedCacheEntryOptions options)
         {

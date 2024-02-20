@@ -6,7 +6,7 @@ namespace ScaledDomains.Extensions.Caching.MySql
 {
     public class ValidateMySqlServerCacheOptions : IValidateOptions<MySqlServerCacheOptions>
     {
-        public ValidateOptionsResult Validate(string name, MySqlServerCacheOptions options)
+        public ValidateOptionsResult Validate(string? name, MySqlServerCacheOptions options)
         {
             var failures = new List<string>();
             if (string.IsNullOrWhiteSpace(options.ConnectionString))

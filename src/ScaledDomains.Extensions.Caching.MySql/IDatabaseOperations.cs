@@ -6,9 +6,9 @@ namespace ScaledDomains.Extensions.Caching.MySql
 {
     public interface IDatabaseOperations
     {
-        byte[] GetCacheItem(string key);
+        byte[]? GetCacheItem(string key);
 
-        Task<byte[]> GetCacheItemAsync(string key, CancellationToken token = default);
+        Task<byte[]?> GetCacheItemAsync(string key, CancellationToken token = default);
 
         void SetCacheItem(string key, byte[] value, DistributedCacheEntryOptions options);
 

@@ -28,14 +28,10 @@ namespace ScaledDomains.Extensions.Caching.MySql
             {
                 throw new ArgumentNullException(nameof(setupAction));
             }
-
-            services.TryAddEnumerable(ServiceDescriptor.Singleton<IValidateOptions<MySqlServerCacheOptions>, ValidateMySqlServerCacheOptions>());
+            
+            services.AddOptions();
+            AddDistributedMySqlServerCache(services);
             services.Configure(setupAction);
-            services.TryAddSingleton<ISystemClock, SystemClock>();
-            services.TryAddSingleton<IDatabaseOperations, DatabaseOperations>();
-            services.AddSingleton<IDistributedCache, MySqlServerCache>();
-
-            services.AddHostedService<MySqlServerCacheMaintenanceService>();
 
             return services;
         }
@@ -47,7 +43,19 @@ namespace ScaledDomains.Extensions.Caching.MySql
         /// <returns>The <see cref="IServiceCollection"/> so that additional calls can be chained.</returns>
         public static IServiceCollection AddDistributedMySqlServerCache(this IServiceCollection services)
         {
-            return services.AddDistributedMySqlServerCache(_ => {});
+            if (services == null)
+            {
+                throw new ArgumentNullException(nameof(services));
+            }
+
+            services.TryAddEnumerable(ServiceDescriptor.Singleton<IValidateOptions<MySqlServerCacheOptions>, ValidateMySqlServerCacheOptions>());
+            services.TryAddSingleton<ISystemClock, SystemClock>();
+            services.TryAddSingleton<IDatabaseOperations, DatabaseOperations>();
+            services.AddSingleton<IDistributedCache, MySqlServerCache>();
+
+            services.AddHostedService<MySqlServerCacheMaintenanceService>();
+            
+            return services;
         }
     }
 }
