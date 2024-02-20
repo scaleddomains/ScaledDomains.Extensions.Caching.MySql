@@ -31,6 +31,7 @@ namespace ScaledDomains.Extensions.Caching.MySql
                 }
                 catch(TaskCanceledException)
                 {
+                    return;
                 }
                 catch(Exception exception)
                 {
