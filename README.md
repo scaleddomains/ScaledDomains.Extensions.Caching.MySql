@@ -4,10 +4,10 @@
 
 ScaledDomains.Extensions.Caching.MySql is a free, open source distributed cache implementation using MySql as datastore, inspired by [Microsoft.Extensions.Cachning.SqlServer](https://www.nuget.org/packages/Microsoft.Extensions.Caching.SqlServer). Founded and maintained by [Endre Toth](https://github.com/endret) and [Attila Ersek](https://github.com/attilaersek).
 
-![Build](https://github.com/scaleddomains/ScaledDomains.Extensions.Caching.MySql/workflows/build-master-and-publish/badge.svg?branch=master)
-![License](https://img.shields.io/github/license/scaleddomains/ScaledDomains.Extensions.Caching.MySql)
-[![codecov](https://codecov.io/gh/scaleddomains/ScaledDomains.Extensions.Caching.MySql/branch/master/graph/badge.svg)](https://codecov.io/gh/scaleddomains/ScaledDomains.Extensions.Caching.MySql)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=scaleddomains_ScaledDomains.Extensions.Caching.MySql&metric=alert_status)](https://sonarcloud.io/dashboard?id=scaleddomains_ScaledDomains.Extensions.Caching.MySql)
+[![Build](https://github.com/scaleddomains/ScaledDomains.Extensions.Caching.MySql/actions/workflows/build-master.yml/badge.svg)](https://github.com/scaleddomains/ScaledDomains.Extensions.Caching.MySql/actions/workflows/build-master.yml)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Codecov](https://codecov.io/gh/scaleddomains/ScaledDomains.Extensions.Caching.MySql/branch/master/graph/badge.svg)](https://codecov.io/gh/scaleddomains/ScaledDomains.Extensions.Caching.MySql)
+[![SonarCloud](https://sonarcloud.io/api/project_badges/measure?project=scaleddomains_ScaledDomains.Extensions.Caching.MySql&metric=alert_status)](https://sonarcloud.io/dashboard?id=scaleddomains_ScaledDomains.Extensions.Caching.MySql)
 
 ## Getting started
 
