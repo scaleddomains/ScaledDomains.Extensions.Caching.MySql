@@ -18,10 +18,10 @@ jobs:
     - uses: actions/checkout@v4
     - name: Fetch all history for all tags and branches
       run: if $(git rev-parse --is-shallow-repository); then git fetch --prune --unshallow ; fi
-    - name: Setup .NET Core
+    - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 6.0.x
+        dotnet-version: 8.0.x
     - name: Install dependencies
       run: dotnet restore --no-cache --locked-mode --use-lock-file
     - name: Install tools
