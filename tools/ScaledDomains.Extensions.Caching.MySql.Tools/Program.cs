@@ -34,7 +34,7 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tools
             {
                 createCommand.Description = app.Description;
                 createCommand.ExtendedHelpText =
-                    "\nExample usage:\n mysql-distributed-cache create Server=example.com;Database=db;User=myUser;Password=mySecret; myTableName";
+                    "\nExample usage:\n mysql-distributed-cache create \"Server=example.com;Database=db;User=myUser;\" myTableName";
 
                 var connectionStringArg = createCommand.Argument(
                     "[connectionString]", "The mysql connection string to connect to the database.");
@@ -42,7 +42,7 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tools
                 var tableNameArg = createCommand.Argument(
                     "[tableName]", "Name of the table to be created.");
 
-                var forceOpt = createCommand.Option("-f | --force", "Force to create the table (if the table is already exist will remove it)",
+                var forceOpt = createCommand.Option("-f | --force", "Force to create the table (if the table is already exist, will remove it)",
                     CommandOptionType.NoValue);
 
                 createCommand.HelpOption("-? | -h | --help");
@@ -59,7 +59,7 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tools
                         return 1;
                     }
 
-                    Console.WriteLine("Creating cache table with a following parameters:");
+                    Console.WriteLine("Creating cache table with the following parameters:");
                     Console.WriteLine($" {connectionStringArg.Name} : {connectionStringArg.Value}");
                     Console.WriteLine($" {tableNameArg.Name} : {tableNameArg.Value}");
 
