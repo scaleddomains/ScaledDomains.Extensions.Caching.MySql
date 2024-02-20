@@ -1,10 +1,7 @@
 using System;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.Internal;
 
 namespace ScaledDomains.Extensions.Caching.MySql
 {
@@ -15,20 +12,13 @@ namespace ScaledDomains.Extensions.Caching.MySql
     {
         private readonly IDatabaseOperations _databaseOperations;
 
-        public MySqlServerCache(IOptions<MySqlServerCacheOptions> options)
+        public MySqlServerCache(IDatabaseOperations databaseOperations)
         {
-            if (options == null)
-            {
-                throw new ArgumentNullException(nameof(options), $"{nameof(options)} cannot be null.");
-            }
-
-            options.Value.Validate();
-
-            _databaseOperations = options.Value.DatabaseOperations ?? new DatabaseOperations(options.Value);
+            _databaseOperations = databaseOperations ?? throw new ArgumentNullException(nameof(databaseOperations));
         }
 
         /// <inheritdoc />
-        public byte[] Get(string key)
+        public byte[]? Get(string key)
         {
             ValidateKey(key);
 
@@ -38,7 +28,7 @@ namespace ScaledDomains.Extensions.Caching.MySql
         }
 
         /// <inheritdoc />
-        public async Task<byte[]> GetAsync(string key, CancellationToken token = new CancellationToken())
+        public async Task<byte[]?> GetAsync(string key, CancellationToken token = new CancellationToken())
         {
             ValidateKey(key);
 
@@ -70,12 +60,12 @@ namespace ScaledDomains.Extensions.Caching.MySql
             CancellationToken token = new CancellationToken())
         {
             ValidateKey(key);
-
+            
             if (options == null)
             {
                 throw new ArgumentNullException(nameof(options), $"{nameof(options)} cannot be null.");
             }
-
+            
             await _databaseOperations.SetCacheItemAsync(key, value, options, token);
         }
 

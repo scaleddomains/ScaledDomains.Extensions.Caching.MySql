@@ -3,6 +3,7 @@ using System.Linq;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
@@ -11,14 +12,39 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tests
     [TestClass]
     public class MySqlServerCachingServicesExtensionsTests
     {
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
+        [TestMethod]        
         public void AddDistributedSqlServerCache_WithNullServicesCollection_ShouldThrowArgumentNullException()
         {
-            MySqlServerCachingServicesExtensions.AddDistributedMySqlServerCache(null, options => {
-                options.ConnectionString = "Server=example.com;Database=db;User=root";
+            Assert.ThrowsException<ArgumentNullException>(() => MySqlServerCachingServicesExtensions.AddDistributedMySqlServerCache(null, Mock.Of<Action<MySqlServerCacheOptions>>()));
+            Assert.ThrowsException<ArgumentNullException>(() => MySqlServerCachingServicesExtensions.AddDistributedMySqlServerCache(null));
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(OptionsValidationException))]
+        public void AddDistributedSqlServerCache_WithNullConnectionString_ShouldThrowOptionsValidationException()
+        {
+            var services = new ServiceCollection();
+
+            MySqlServerCachingServicesExtensions.AddDistributedMySqlServerCache(services, options => {
+                options.ConnectionString = null;
                 options.TableName = "MyTable";
             });
+            
+            services.BuildServiceProvider().GetService<IDistributedCache>();
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(OptionsValidationException))]
+        public void AddDistributedSqlServerCache_WithNullTabeName_ShouldThrowOptionsValidationException()
+        {
+            var services = new ServiceCollection();
+
+            MySqlServerCachingServicesExtensions.AddDistributedMySqlServerCache(services, options => {
+                options.ConnectionString = "Server=example.com;Database=db;User=root;";
+                options.TableName = null;
+            });
+
+            services.BuildServiceProvider().GetService<IDistributedCache>();
         }
 
         [TestMethod]
@@ -29,7 +55,30 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tests
         }
 
         [TestMethod]
-        public void AddDistributedSqlServerCache_AddsAsSingleRegistrationService()
+        public void AddDistributedSqlServerCacheWithOptions_ConfiguresWithDefaultOptions()
+        {
+            // Arrange
+
+            var serviceCollectionMock = new Mock<IServiceCollection>();
+            var services = serviceCollectionMock.Object;
+            
+            var setupAction = new Action<MySqlServerCacheOptions>(_ => {});
+
+            // Act
+
+            services.AddDistributedMySqlServerCache(setupAction);
+
+            // Assert
+            serviceCollectionMock.Verify(s => s.Add(
+                It.Is<ServiceDescriptor>(
+                    sd => sd.ServiceType == typeof(IConfigureOptions<MySqlServerCacheOptions>) && 
+                    sd.Lifetime == ServiceLifetime.Singleton && 
+                    sd.ImplementationInstance != null)), 
+                Times.Once());
+        }
+
+        [TestMethod]
+        public void AddDistributedSqlServerCache__AddsAsSingleRegistrationService()
         {
             // Arrange
 
