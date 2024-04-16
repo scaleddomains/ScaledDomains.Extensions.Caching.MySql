@@ -469,7 +469,7 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tests
         {
             _mySqlServerCache.Set(
                 "myKey",
-                new byte[] { 1, 2, 3 },
+                [1, 2, 3],
                 new DistributedCacheEntryOptions { SlidingExpiration = null, AbsoluteExpiration = null });
         }
 
@@ -479,7 +479,7 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tests
         {
             _mySqlServerCache.Set(
                 "myKey",
-                new byte[] { 1, 2, 3 },
+                [1, 2, 3],
                 null);
         }
 
@@ -489,7 +489,7 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tests
         {
             await _mySqlServerCache.SetAsync(
                 "myKey",
-                new byte[] { 1, 2, 3 },
+                [1, 2, 3],
                 null);
         }
 
@@ -499,7 +499,7 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tests
         {
             _mySqlServerCache.Set(
                 "myKey",
-                new byte[] { 1, 2, 3 },
+                [1, 2, 3],
                 new DistributedCacheEntryOptions { SlidingExpiration = null, AbsoluteExpiration = _utcNow.AddMilliseconds(-1) });
         }
 
@@ -512,7 +512,7 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tests
         {
             _mySqlServerCache.Set(
                 key,
-                new byte[] { 1, 2, 3 },
+                [1, 2, 3],
                 new DistributedCacheEntryOptions { AbsoluteExpiration = _utcNow.AddMilliseconds(1) });
         }
 
@@ -522,7 +522,7 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tests
         {
             _mySqlServerCache.Set(
                 string.Join("", Enumerable.Repeat("K", 767 + 1)),
-                new byte[] { 1, 2, 3 },
+                [1, 2, 3],
                 new DistributedCacheEntryOptions { AbsoluteExpiration = _utcNow.AddMilliseconds(1) });
         }
 
@@ -545,7 +545,7 @@ namespace ScaledDomains.Extensions.Caching.MySql.Tests
 
                     return _mySqlServerCache.SetAsync(
                         keyName,
-                        new byte[] { 1, 2, 3 },
+                        [1, 2, 3],
                         new DistributedCacheEntryOptions { AbsoluteExpiration = _notExpired });
                 });
             }
