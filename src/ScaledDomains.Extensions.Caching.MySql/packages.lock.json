@@ -404,6 +404,14 @@
           "Microsoft.Bcl.AsyncInterfaces": "5.0.0",
           "System.Memory": "4.5.5"
         }
+      },
+      "scaleddomains.extensions.caching.mysql.core": {
+        "type": "Project",
+        "dependencies": {
+          "Microsoft.Extensions.Caching.Abstractions": "[8.0.0, )",
+          "Microsoft.Extensions.Hosting.Abstractions": "[8.0.0, )",
+          "Microsoft.Extensions.Options": "[8.0.2, )"
+        }
       }
     },
     "net6.0": {
@@ -758,6 +766,14 @@
         "type": "Transitive",
         "resolved": "0.7.1",
         "contentHash": "Idgg+mJEyAujqDPzA3APy9dNoyw0YQcNA65GgYjktDRtJ+nvx/hv+J+m6Eax3JJMGEYGy04oc5YNP6ZvQ3Y1vQ=="
+      },
+      "scaleddomains.extensions.caching.mysql.core": {
+        "type": "Project",
+        "dependencies": {
+          "Microsoft.Extensions.Caching.Abstractions": "[8.0.0, )",
+          "Microsoft.Extensions.Hosting.Abstractions": "[8.0.0, )",
+          "Microsoft.Extensions.Options": "[8.0.2, )"
+        }
       }
     },
     "net8.0": {
@@ -1102,6 +1118,14 @@
         "type": "Transitive",
         "resolved": "0.7.1",
         "contentHash": "Idgg+mJEyAujqDPzA3APy9dNoyw0YQcNA65GgYjktDRtJ+nvx/hv+J+m6Eax3JJMGEYGy04oc5YNP6ZvQ3Y1vQ=="
+      },
+      "scaleddomains.extensions.caching.mysql.core": {
+        "type": "Project",
+        "dependencies": {
+          "Microsoft.Extensions.Caching.Abstractions": "[8.0.0, )",
+          "Microsoft.Extensions.Hosting.Abstractions": "[8.0.0, )",
+          "Microsoft.Extensions.Options": "[8.0.2, )"
+        }
       }
     }
   }

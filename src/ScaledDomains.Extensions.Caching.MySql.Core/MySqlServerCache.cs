@@ -1,6 +1,3 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Distributed;
 
 namespace ScaledDomains.Extensions.Caching.MySql
@@ -106,9 +103,9 @@ namespace ScaledDomains.Extensions.Caching.MySql
                 throw new ArgumentNullException(nameof(key), $"{nameof(key)} cannot be null or empty.");
             }
 
-            if (key.Length > DatabaseOperations.IdColumnSize)
+            if (key.Length > DatabaseConsts.IdColumnSize)
             {
-                throw new ArgumentOutOfRangeException(nameof(key), key.Length, $"{nameof(key)} length cannot be more than {DatabaseOperations.IdColumnSize}.");
+                throw new ArgumentOutOfRangeException(nameof(key), key.Length, $"{nameof(key)} length cannot be more than {DatabaseConsts.IdColumnSize}.");
             }
         }
     }
